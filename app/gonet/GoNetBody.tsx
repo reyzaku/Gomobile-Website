@@ -1,0 +1,303 @@
+"use client";
+import { useEffect, useRef } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { addReveal } from "../utils/scrollReveal";
+
+const STATS = [
+  { num: 24,    suffix: "",    label: "SSPs via OpenRTB" },
+  { num: 15,    suffix: "+",   label: "Ad Formats" },
+  { num: 9,     suffix: "yrs", label: "In Operation" },
+  { num: 2.4,   suffix: "B+",  label: "Daily Bid Requests" },
+  { num: 98.7,  suffix: "%",   label: "Brand Safe Rate" },
+  { num: 106.7, suffix: "%",   label: "Avg Delivery Accuracy" },
+];
+
+const FEATURES = [
+  {
+    icon: "🎯",
+    title: "AI Sensible Targeting",
+    tag: "INTELLIGENCE",
+    desc: "Full-page content analysis via computer vision. Real-time user profiling that adapts to intent and mood shifts — privacy-safe across WEB and IN-APP environments. No third-party cookie dependency.",
+    bullets: ["Page-level contextual scoring", "Behavioural intent signals", "Mood & sentiment detection", "Privacy-safe by design"],
+  },
+  {
+    icon: "🛡️",
+    title: "Pre-bid Traffic Filter",
+    tag: "BRAND SAFETY",
+    desc: "Filters fraudulent impressions before they hit your budget. Every live bid is analysed against 3rd-party trackers and verification to protect brand safety goals — before the auction, not after.",
+    bullets: ["IAS + DoubleVerify integration", "Invalid Traffic (IVT) rejection", "Content category blocking", "Seller verification via ads.txt"],
+  },
+  {
+    icon: "⚡",
+    title: "ML Price Optimiser",
+    tag: "PERFORMANCE",
+    desc: "Machine learning predicts optimal bid prices in real-time — maximising impression value while keeping CPMs efficient across every placement and format.",
+    bullets: ["Bid price prediction per auction", "Win rate vs CPM trade-off model", "Placement-level value scoring", "Automatic floor optimisation"],
+  },
+  {
+    icon: "📊",
+    title: "Reporting & Transparency",
+    tag: "INSIGHTS",
+    desc: "Full placement-level transparency. Every domain, every app, every placement — with real-time blocking capability and daily performance exports.",
+    bullets: ["Domain + app-level reporting", "Real-time campaign dashboard", "Third-party tag compatibility", "Custom attribution windows"],
+  },
+  {
+    icon: "🔗",
+    title: "24 SSP Connections",
+    tag: "SUPPLY",
+    desc: "Direct OpenRTB integrations with 24 premium supply-side platforms across display, video, native, and in-app inventory. No daisy-chain reselling.",
+    bullets: ["Xandr, Index, Magnite, Pubmatic", "OpenX, TripleLift, Sovrn", "In-app via IronSource, InMobi", "CTV via DistroScale, Beachfront"],
+  },
+  {
+    icon: "📱",
+    title: "Cross-Environment",
+    tag: "REACH",
+    desc: "Unified buying across WEB, IN-APP, CTV, and OTT from a single DSP seat — with device-graph frequency capping to control reach across screens.",
+    bullets: ["Desktop + mobile web", "iOS + Android in-app (MRAID)", "CTV via VAST/VPAID", "OTT pre-roll and mid-roll"],
+  },
+];
+
+const SPECS = [
+  { label: "Bid Protocol",       v: "OpenRTB 2.5 + 3.0" },
+  { label: "Response Time",      v: "< 80ms avg" },
+  { label: "QPS Capacity",       v: "2.4B+ daily" },
+  { label: "Ad Formats",         v: "15+ IAB-certified" },
+  { label: "Attribution",        v: "Click + view, custom window" },
+  { label: "Data Activation",    v: "1P, 2P, 3P segments" },
+  { label: "Creative Types",     v: "Display, Video, Native, HTML5" },
+  { label: "Brand Safety",       v: "IAS + DV certified" },
+  { label: "Reporting",          v: "Real-time, 30-min refresh" },
+  { label: "Support",            v: "Dedicated trading desk" },
+];
+
+const SSPS = ["Xandr", "Index Exchange", "Magnite", "PubMatic", "OpenX", "TripleLift", "Sovrn", "InMobi", "IronSource", "DistroScale", "Beachfront", "Sharethrough"];
+
+export function GoNetBody() {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
+    const el = ref.current;
+    if (!el) return;
+
+    // ── Hero — scoped to ref so client-nav always starts clean ──
+    const heroItems = el.querySelectorAll(".gn-hero > *");
+    const heroTweens: gsap.core.Tween[] = [];
+    if (heroItems.length) {
+      gsap.set(heroItems, { y: 50, opacity: 0 });
+      heroTweens.push(
+        gsap.to(heroItems, {
+          y: 0, opacity: 1, stagger: 0.12, duration: 1,
+          ease: "power3.out", delay: 0.1, overwrite: true,
+        })
+      );
+    }
+
+    // Stat counters
+    const statEls = el.querySelectorAll<HTMLElement>(".gn-stat-value");
+    const triggers: ScrollTrigger[] = [];
+    statEls.forEach((node) => {
+      const target = parseFloat(node.dataset.value || "0");
+      const suffix = node.dataset.suffix || "";
+      const obj = { val: 0 };
+      const t = ScrollTrigger.create({
+        trigger: node, start: "top 88%", once: true,
+        onEnter: () => gsap.to(obj, {
+          val: target, duration: 1.8, ease: "power2.out",
+          onUpdate() {
+            node.textContent = (Number.isInteger(target) ? Math.round(obj.val) : obj.val.toFixed(1)) + suffix;
+          },
+        }),
+      });
+      triggers.push(t);
+    });
+
+    addReveal(el, el.querySelectorAll(".gn-stat"),    { stagger: 0.09, duration: 1.1, y: 40, start: "top 88%" });
+    addReveal(el, el.querySelectorAll(".gn-feature"), { stagger: 0.1,  duration: 1.2, y: 50, start: "top 88%" });
+    addReveal(el, el.querySelectorAll(".gn-section"), { duration: 1.2, y: 40 });
+    addReveal(el, el.querySelectorAll(".gn-spec"),    { stagger: 0.05, duration: 0.9, y: 30, start: "top 90%" });
+    addReveal(el, el.querySelectorAll(".gn-ssp"),     { stagger: 0.05, duration: 0.8, y: 20, start: "top 90%" });
+
+    return () => {
+      heroTweens.forEach((t) => t.kill());
+      triggers.forEach((t) => t.kill());
+    };
+  }, []);
+
+  return (
+    <div ref={ref}>
+      {/* ── Hero ── */}
+      <section
+        className="relative px-6 md:px-[136px] pt-[160px] md:pt-[240px] pb-20 md:pb-32 overflow-hidden"
+      >
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{ background: "radial-gradient(ellipse 80% 60% at 50% 40%, rgba(239,102,0,0.1), transparent 70%)" }}
+        />
+        <div className="gn-hero relative flex flex-col items-start gap-6 max-w-[800px]">
+          <div className="flex items-center gap-3">
+            <span className="chip">IN-HOUSE DSP</span>
+            <span className="text-xs font-bold tracking-[6px] uppercase" style={{ color: "var(--muted)" }}>Est. 2018</span>
+          </div>
+          <h1 className="font-bricolage font-bold leading-none tracking-[-5px]" style={{ fontSize: "clamp(72px, 12vw, 140px)", color: "var(--fg)" }}>
+            <span className="text-gradient">GO</span>NET
+          </h1>
+          <p className="text-lg md:text-2xl leading-[1.5] max-w-[640px]" style={{ color: "var(--muted)" }}>
+            Our independent real-time bidding platform for APP &amp; WEB traffic — connecting to 24 SSPs with AI-powered targeting and built-in brand safety, no third-party cookies required.
+          </p>
+          <div className="flex flex-wrap gap-3 mt-2">
+            {["OpenRTB 2.5+", "24 SSPs", "AI Targeting", "Pre-bid Safety", "ML Optimisation"].map((t) => (
+              <span key={t} className="chip">{t}</span>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Stats ── */}
+      <section className="px-6 md:px-[136px] pb-16 md:pb-24">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+          {STATS.map((s) => (
+            <div key={s.label} className="gn-stat flex flex-col gap-2 p-6 rounded-[20px]"
+              style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
+              <p
+                className="gn-stat-value font-bricolage font-extrabold text-4xl leading-none tracking-[-2px] text-gradient"
+                data-value={s.num}
+                data-suffix={s.suffix}
+              >
+                0{s.suffix}
+              </p>
+              <p className="text-xs" style={{ color: "var(--muted)" }}>{s.label}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Features ── */}
+      <section className="px-6 md:px-[136px] py-10 md:py-16">
+        <div className="gn-section flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12">
+          <div>
+            <p className="font-helvetica font-bold text-xs tracking-[9px]" style={{ color: "#ef6600" }}>PLATFORM CAPABILITIES</p>
+            <h2 className="font-bricolage font-bold text-3xl md:text-4xl leading-[1.1] tracking-tight mt-2" style={{ color: "var(--fg)" }}>
+              What GoNet does<br />that others can't.
+            </h2>
+          </div>
+          <p className="max-w-[360px] text-base leading-[1.5]" style={{ color: "var(--muted)" }}>
+            Built from the ground up for SEA inventory — no resold third-party DSP seats, no black-box fees.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+          {FEATURES.map((f) => (
+            <div key={f.title} className="gn-feature flex flex-col gap-5 p-10 rounded-[28px] min-h-[360px]"
+              style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
+              <div className="flex items-start justify-between">
+                <div className="w-16 h-16 rounded-full flex items-center justify-center text-2xl"
+                  style={{ background: "linear-gradient(135deg, rgba(239,102,0,0.2), rgba(203,0,0,0.12))" }}>
+                  {f.icon}
+                </div>
+                <span className="text-[10px] font-bold tracking-[2px] px-2.5 py-1 rounded-full"
+                  style={{ background: "rgba(239,102,0,0.12)", color: "#ef6600" }}>
+                  {f.tag}
+                </span>
+              </div>
+              <div className="flex flex-col gap-2">
+                <h3 className="font-bricolage font-bold text-2xl tracking-tight" style={{ color: "var(--fg)" }}>{f.title}</h3>
+                <p className="text-sm leading-[1.6]" style={{ color: "var(--muted)" }}>{f.desc}</p>
+              </div>
+              <ul className="flex flex-col gap-2 mt-auto">
+                {f.bullets.map((b) => (
+                  <li key={b} className="flex items-start gap-2 text-sm" style={{ color: "var(--fg)" }}>
+                    <span className="text-gradient mt-0.5 shrink-0">→</span>
+                    <span>{b}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Tech Specs ── */}
+      <section className="px-6 md:px-[136px] py-10 md:py-16">
+        <div className="gn-section mb-10">
+          <p className="font-helvetica font-bold text-xs tracking-[9px]" style={{ color: "#ef6600" }}>TECHNICAL SPECIFICATIONS</p>
+          <h2 className="font-bricolage font-bold text-3xl md:text-4xl leading-[1.1] tracking-tight mt-2" style={{ color: "var(--fg)" }}>
+            Built for performance at scale.
+          </h2>
+        </div>
+        <div
+          className="rounded-[28px] overflow-hidden"
+          style={{ border: "1px solid var(--border)" }}
+        >
+          {SPECS.map((s, i) => (
+            <div
+              key={s.label}
+              className="gn-spec grid grid-cols-2 px-8 py-5"
+              style={{
+                borderBottom: i < SPECS.length - 1 ? "1px solid var(--border)" : "none",
+                background: i % 2 === 0 ? "var(--card)" : "transparent",
+              }}
+            >
+              <p className="text-sm font-bold" style={{ color: "var(--muted)" }}>{s.label}</p>
+              <p className="text-sm font-bold" style={{ color: "var(--fg)" }}>{s.v}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── SSP Partners ── */}
+      <section className="px-6 md:px-[136px] py-10 md:py-16">
+        <div className="gn-section mb-10">
+          <p className="font-helvetica font-bold text-xs tracking-[9px]" style={{ color: "#ef6600" }}>SUPPLY PARTNERS</p>
+          <h2 className="font-bricolage font-bold text-3xl md:text-4xl leading-[1.1] tracking-tight mt-2" style={{ color: "var(--fg)" }}>
+            24 SSPs, direct OpenRTB.
+          </h2>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {SSPS.map((s) => (
+            <div
+              key={s}
+              className="gn-ssp px-5 py-3 rounded-full text-sm font-bold"
+              style={{ background: "var(--card)", border: "1px solid var(--border)", color: "var(--fg)" }}
+            >
+              {s}
+            </div>
+          ))}
+          <div
+            className="gn-ssp px-5 py-3 rounded-full text-sm font-bold"
+            style={{ background: "linear-gradient(90deg, rgba(239,102,0,0.15), rgba(203,0,0,0.15))", border: "1px solid rgba(239,102,0,0.3)", color: "#ef6600" }}
+          >
+            +12 more
+          </div>
+        </div>
+      </section>
+
+      {/* ── How it connects ── */}
+      <section className="px-6 md:px-[136px] py-10 md:py-16">
+        <div className="gn-section mb-10">
+          <p className="font-helvetica font-bold text-xs tracking-[9px]" style={{ color: "#ef6600" }}>HOW IT WORKS</p>
+          <h2 className="font-bricolage font-bold text-3xl md:text-4xl leading-[1.1] tracking-tight mt-2" style={{ color: "var(--fg)" }}>
+            Bid to impression in &lt;80ms.
+          </h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
+          {[
+            { num: "01", title: "Bid Request",    desc: "Publisher sends a bid request via OpenRTB 2.5+. GoNet receives up to 2.4B requests daily." },
+            { num: "02", title: "Pre-bid Filter", desc: "Request evaluated for brand safety, fraud signals, and audience match before entering the auction." },
+            { num: "03", title: "AI Bid Decision",desc: "ML model scores the impression opportunity and submits a calculated optimal bid price in real-time." },
+            { num: "04", title: "Ad Served",      desc: "If bid wins, the creative is returned and rendered. Impression logged, attribution pixel fires." },
+          ].map((step) => (
+            <div key={step.num} className="gn-feature flex flex-col gap-4 p-8 rounded-[24px]"
+              style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
+              <p className="font-bricolage font-extrabold text-5xl leading-none tracking-[-2px] text-gradient">{step.num}</p>
+              <div className="flex flex-col gap-2">
+                <h3 className="font-bricolage font-bold text-xl tracking-tight" style={{ color: "var(--fg)" }}>{step.title}</h3>
+                <p className="text-sm leading-[1.6]" style={{ color: "var(--muted)" }}>{step.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+}
