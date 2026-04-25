@@ -22,10 +22,13 @@ html, body {
   background: var(--bg);
   color: var(--fg);
   -webkit-font-smoothing: antialiased;
-  cursor: none;
 }
 
-a, button, [role="button"] { cursor: none; }
+/* Hide cursor only on pointer devices (not touch) */
+@media (hover: hover) and (pointer: fine) {
+  html, body { cursor: none; }
+  a, button, [role="button"] { cursor: none; }
+}
 
 /* ─── Mesh gradient background ─── */
 .mesh-bg {

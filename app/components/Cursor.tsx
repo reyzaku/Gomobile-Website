@@ -13,6 +13,11 @@ export function Cursor() {
   const raf        = useRef<number>(0);
   const hovering   = useRef(false);
 
+  // Don't render on touch-only devices
+  if (typeof window !== "undefined" && window.matchMedia("(hover: none) and (pointer: coarse)").matches) {
+    return null;
+  }
+
   /* ── Reset hover state on every route change ── */
   useEffect(() => {
     const ring = ringRef.current;

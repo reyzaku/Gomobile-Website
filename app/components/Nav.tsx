@@ -138,7 +138,7 @@ export function Nav() {
 
       {/* ── Mobile drawer ── */}
       {open && (
-        <div className="md:hidden mt-2 rounded-2xl p-6 flex flex-col gap-4 glass">
+        <div className="md:hidden mt-2 rounded-2xl p-6 flex flex-col gap-4 glass" style={{ backdropFilter: "blur(40px) saturate(1.8)", WebkitBackdropFilter: "blur(40px) saturate(1.8)", background: theme === "dark" ? "rgba(10,10,10,0.92)" : "rgba(255,255,255,0.92)" }}>
           {LINKS.map((l) => (
             <Link
               key={l.href}
