@@ -110,7 +110,7 @@ export function Nav() {
           <ul className="flex gap-8 text-xs font-bold font-helvetica">
             {LINKS.map((l) => (
               <li key={l.href}>
-                <Link href={l.href} className="nav-link" style={{ color: "var(--fg)" }}>
+                <Link href={l.href} className="nav-link">
                   {l.label}
                 </Link>
               </li>
@@ -145,7 +145,6 @@ export function Nav() {
               href={l.href}
               onClick={() => setOpen(false)}
               className="text-sm font-bold font-helvetica nav-link"
-              style={{ color: "var(--fg)" }}
             >
               {l.label}
             </Link>

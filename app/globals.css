@@ -170,9 +170,7 @@ html, body {
 /* ─── Nav link hover ─── */
 .nav-link {
   position: relative;
-  -webkit-background-clip: unset;
-  background-clip: unset;
-  transition: opacity 0.2s ease;
+  color: var(--fg);
 }
 .nav-link:hover {
   background: linear-gradient(52deg, #ef6600 22%, #cb0000 91%);
