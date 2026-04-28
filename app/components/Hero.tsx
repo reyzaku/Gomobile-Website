@@ -91,7 +91,30 @@ export function Hero() {
   const stat = STATS[displayedIdx];
 
   return (
-    <section ref={heroRef} className="relative pt-[100px] md:pt-[180px] lg:pt-[294px] pb-24 px-6 md:px-[150px]">
+    <section ref={heroRef} className="relative overflow-hidden pt-[100px] md:pt-[180px] lg:pt-[294px] pb-24 px-6 md:px-[150px]">
+
+      {/* Video background */}
+      <video
+        autoPlay
+        muted
+        loop
+        playsInline
+        className="absolute inset-0 w-full h-full object-cover z-0"
+        src="/assets/hero-video.mp4"
+      />
+
+      {/* Theme overlay */}
+      <div
+        className="absolute inset-0 z-[1]"
+        style={{
+          background: theme === "dark"
+            ? "rgba(0, 0, 0, 0.72)"
+            : "rgba(255, 255, 255, 0.78)",
+        }}
+      />
+
+      {/* Content sits above video + overlay */}
+      <div className="relative z-[2]">
 
       {/* ── Mobile layout (< lg) ── */}
       <div className="flex flex-col items-center gap-7 lg:hidden">
@@ -237,6 +260,8 @@ export function Hero() {
         </div>
 
       </div>
+
+      </div>{/* end z-[2] content wrapper */}
     </section>
   );
 }
