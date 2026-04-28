@@ -93,23 +93,19 @@ export function Hero() {
   return (
     <section ref={heroRef} className="relative overflow-hidden pt-[100px] md:pt-[180px] lg:pt-[294px] pb-24 px-6 md:px-[150px]">
 
-      {/* Video background */}
-      <video
-        autoPlay
-        muted
-        loop
-        playsInline
-        className="absolute inset-0 w-full h-full object-cover z-0"
-        src="/assets/hero-video.mp4"
+      {/* Background image */}
+      <div
+        className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: "url('/assets/hero-bg.png')" }}
       />
 
-      {/* Theme overlay */}
+      {/* Theme overlay + bottom fade */}
       <div
         className="absolute inset-0 z-[1]"
         style={{
           background: theme === "dark"
-            ? "rgba(0, 0, 0, 0.72)"
-            : "rgba(255, 255, 255, 0.78)",
+            ? "linear-gradient(to bottom, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.60) 60%, rgba(10,10,10,1) 100%)"
+            : "linear-gradient(to bottom, rgba(255,255,255,0.70) 0%, rgba(255,255,255,0.65) 60%, rgba(248,248,248,1) 100%)",
         }}
       />
 
