@@ -5,6 +5,13 @@ import { ContactCTA } from "../../components/ContactCTA";
 import { BackgroundGrain } from "../../components/BackgroundGrain";
 import { BlogPostDetail } from "./BlogPostDetail";
 import { BLOG_POSTS, getPost } from "../data";
+
+// Pre-build all known slugs at deploy time, revalidate every hour (ISR)
+export const revalidate = 3600;
+
+// Allow on-demand generation for slugs not in generateStaticParams
+export const dynamicParams = true;
+
 export async function generateStaticParams() {
   return BLOG_POSTS.map((p) => ({ slug: p.slug }));
 }

@@ -4,6 +4,9 @@ import { ContactCTA } from "../components/ContactCTA";
 import { BackgroundGrain } from "../components/BackgroundGrain";
 import { PageHero } from "../components/PageHero";
 import { BlogBody } from "./BlogBody";
+// Revalidate blog listing every hour in the background (ISR)
+export const revalidate = 3600;
+
 export const metadata = {
   title: "Blog — Go Mobile",
   description: "Insights on programmatic, performance, and the future of advertising.",
