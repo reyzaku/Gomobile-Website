@@ -80,7 +80,7 @@ export function CaseStudies() {
           </h2>
         </div>
         <p className="max-w-[317px] text-base leading-[1.5]" style={{ color: "var(--muted)" }}>
-          From programmatic buying to rich media production, we cover every layer of your digital campaign.
+          Real briefs, real budgets, real results. See how we turned campaign goals into numbers worth talking about.
         </p>
       </div>
 
