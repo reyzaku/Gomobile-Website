@@ -1,3 +1,20 @@
+export type ContentBlock = {
+  id: string;
+  type: 'paragraph' | 'heading2' | 'heading3' | 'quote' | 'image' | 'divider' | 'callout' | 'bulletList';
+  content: string;
+};
+
+export type SEOMeta = {
+  metaTitle: string;
+  metaDescription: string;
+  focusKeyword: string;
+  ogTitle: string;
+  ogDescription: string;
+  ogImage: string;
+  canonical: string;
+  noIndex: boolean;
+};
+
 export type BlogPost = {
   slug: string;
   img: string;
@@ -13,6 +30,8 @@ export type BlogPost = {
     sections: { heading: string; content: string }[];
     conclusion: string;
   };
+  blocks?: ContentBlock[];
+  seo?: SEOMeta;
   tags: string[];
   relatedSlugs: string[];
 };

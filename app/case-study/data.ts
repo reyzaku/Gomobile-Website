@@ -9,8 +9,11 @@ export interface CaseStudy {
   brand: string;
   category: string;
   headline: string;
+  subheadline?: string;
   img: string;
   period: string;
+  objective?: string;
+  region?: string;
   tags: string[];
   metrics: CaseMetric[];
   overview: {
@@ -18,6 +21,7 @@ export interface CaseStudy {
     solution: string;
     result: string;
   };
+  keyTakeaway?: string;
   approach: { title: string; desc: string }[];
   channels: string[];
   testimonial?: { quote: string; name: string; role: string };

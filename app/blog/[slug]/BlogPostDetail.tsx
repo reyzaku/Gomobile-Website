@@ -5,7 +5,105 @@ import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { addReveal } from "../../utils/scrollReveal";
-import { BlogPost, getRelatedPosts } from "../data";
+import { BlogPost, ContentBlock, getRelatedPosts } from "../data";
+
+function BlocksRenderer({ blocks }: { blocks: ContentBlock[] }) {
+  return (
+    <div className="flex flex-col gap-6">
+      {blocks.map((block) => {
+        if (!block.content && block.type !== 'divider') return null;
+
+        if (block.type === 'divider') {
+          return <hr key={block.id} className="border-none h-px" style={{ background: 'var(--border)' }} />;
+        }
+
+        if (block.type === 'heading2') {
+          return (
+            <h2
+              key={block.id}
+              className="font-bricolage font-bold text-2xl md:text-3xl leading-[1.15] tracking-tight"
+              style={{ color: 'var(--fg)' }}
+            >
+              {block.content}
+            </h2>
+          );
+        }
+
+        if (block.type === 'heading3') {
+          return (
+            <h3
+              key={block.id}
+              className="font-bricolage font-semibold text-xl md:text-2xl leading-[1.2] tracking-tight"
+              style={{ color: 'var(--fg)' }}
+            >
+              {block.content}
+            </h3>
+          );
+        }
+
+        if (block.type === 'quote') {
+          return (
+            <blockquote
+              key={block.id}
+              className="pl-5 border-l-2 border-orange-500/40"
+            >
+              <p className="text-lg md:text-xl leading-[1.7] italic" style={{ color: 'var(--muted)' }}>
+                {block.content}
+              </p>
+            </blockquote>
+          );
+        }
+
+        if (block.type === 'callout') {
+          return (
+            <div
+              key={block.id}
+              className="glass-card px-6 py-5 rounded-[16px] border-l-2 border-orange-500/40"
+            >
+              <p className="text-base leading-[1.8]" style={{ color: 'var(--fg)' }}>
+                {block.content}
+              </p>
+            </div>
+          );
+        }
+
+        if (block.type === 'bulletList') {
+          const items = block.content.split('\n').filter(Boolean);
+          return (
+            <ul key={block.id} className="space-y-2 pl-4">
+              {items.map((item, i) => (
+                <li key={i} className="flex items-start gap-3">
+                  <span className="mt-2 w-1.5 h-1.5 rounded-full bg-orange-500/60 shrink-0" />
+                  <span className="text-base md:text-lg leading-[1.8]" style={{ color: 'var(--muted)' }}>
+                    {item.replace(/^[-•]\s*/, '')}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          );
+        }
+
+        if (block.type === 'image') {
+          return (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              key={block.id}
+              src={block.content}
+              alt=""
+              className="w-full rounded-[16px] object-cover"
+            />
+          );
+        }
+
+        return (
+          <p key={block.id} className="text-base md:text-lg leading-[1.8]" style={{ color: 'var(--muted)' }}>
+            {block.content}
+          </p>
+        );
+      })}
+    </div>
+  );
+}
 
 export function BlogPostDetail({ post }: { post: BlogPost }) {
   const ref  = useRef<HTMLDivElement>(null);
@@ -80,41 +178,40 @@ export function BlogPostDetail({ post }: { post: BlogPost }) {
 
       {/* ── Body — centered, narrower ── */}
       <section className="px-6 pb-16 md:pb-24">
-        <div className="post-body max-w-[720px] mx-auto flex flex-col gap-10">
-          {/* Intro */}
-          <p className="text-lg md:text-xl leading-[1.8] font-medium" style={{ color: "var(--fg)" }}>
-            {post.body.intro}
-          </p>
-
-          {/* Accent divider */}
-          <div className="w-12 h-1 rounded-full" style={{ background: "linear-gradient(90deg, #ef6600, #cb0000)" }} />
-
-          {/* Sections */}
-          {post.body.sections.map((s) => (
-            <div key={s.heading} className="flex flex-col gap-4">
-              <h2
-                className="font-bricolage font-bold text-2xl md:text-3xl leading-[1.15] tracking-tight"
-                style={{ color: "var(--fg)" }}
-              >
-                {s.heading}
-              </h2>
-              <p className="text-base md:text-lg leading-[1.8]" style={{ color: "var(--muted)" }}>
-                {s.content}
+        <div className="post-body max-w-[720px] mx-auto flex flex-col gap-8">
+          {post.blocks && post.blocks.length > 0 ? (
+            <BlocksRenderer blocks={post.blocks} />
+          ) : (
+            <>
+              <p className="text-lg md:text-xl leading-[1.8] font-medium" style={{ color: "var(--fg)" }}>
+                {post.body.intro}
               </p>
-            </div>
-          ))}
-
-          {/* Conclusion callout */}
-          <div
-            className="glass-card p-8 md:p-10 rounded-[20px] flex flex-col gap-4"
-          >
-            <p className="font-helvetica font-bold text-xs tracking-[9px]" style={{ color: "#ef6600" }}>
-              TAKEAWAY
-            </p>
-            <p className="text-base md:text-lg leading-[1.8]" style={{ color: "var(--fg)" }}>
-              {post.body.conclusion}
-            </p>
-          </div>
+              <div className="w-12 h-1 rounded-full" style={{ background: "linear-gradient(90deg, #ef6600, #cb0000)" }} />
+              {post.body.sections.map((s) => (
+                <div key={s.heading} className="flex flex-col gap-4">
+                  <h2
+                    className="font-bricolage font-bold text-2xl md:text-3xl leading-[1.15] tracking-tight"
+                    style={{ color: "var(--fg)" }}
+                  >
+                    {s.heading}
+                  </h2>
+                  <p className="text-base md:text-lg leading-[1.8]" style={{ color: "var(--muted)" }}>
+                    {s.content}
+                  </p>
+                </div>
+              ))}
+              {post.body.conclusion && (
+                <div className="glass-card p-8 md:p-10 rounded-[20px] flex flex-col gap-4">
+                  <p className="font-helvetica font-bold text-xs tracking-[9px]" style={{ color: "#ef6600" }}>
+                    TAKEAWAY
+                  </p>
+                  <p className="text-base md:text-lg leading-[1.8]" style={{ color: "var(--fg)" }}>
+                    {post.body.conclusion}
+                  </p>
+                </div>
+              )}
+            </>
+          )}
         </div>
       </section>
 
