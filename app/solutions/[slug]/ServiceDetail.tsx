@@ -8,8 +8,40 @@ import { addReveal } from "../../utils/scrollReveal";
 import { Service, SERVICES } from "../data";
 import { CASE_STUDIES } from "../../case-study/data";
 import { Html5Gallery } from "./Html5Gallery";
+import { useDemo } from "../../context/DemoMode";
+
+const LOREM_SERVICE: Service = {
+  slug: "programmatic-display",
+  eyebrow: "01 — LOREM IPSUM",
+  title: "Lorem Ipsum Dolor",
+  thumb: "/assets/service-thumb-programmatic.png",
+  heroDesc: "Lorem ipsum dolor sit amet, consectetur adipiscing — display, native, and in-app.",
+  longDesc: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+  tags: ["LOREM", "IPSUM", "DOLOR", "SIT", "AMET"],
+  stats: [
+    { v: "24",    l: "Lorem Ipsum" },
+    { v: "2.4B+", l: "Dolor Sit Amet" },
+    { v: "98.7%", l: "Consectetur Rate" },
+    { v: "106%",  l: "Avg Adipiscing" },
+  ],
+  features: [
+    { icon: "🎯", title: "Lorem Ipsum Dolor", desc: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna." },
+    { icon: "🛡️", title: "Adipiscing Elit Sit", desc: "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat." },
+    { icon: "⚡", title: "Consectetur Tempor", desc: "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur." },
+    { icon: "📊", title: "Incididunt Labore", desc: "Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est." },
+  ],
+  process: [
+    { num: "01", title: "Lorem Ipsum", desc: "Lorem ipsum dolor sit amet, consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore." },
+    { num: "02", title: "Dolor Sit Amet", desc: "Ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo." },
+    { num: "03", title: "Consectetur", desc: "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla." },
+    { num: "04", title: "Adipiscing Elit", desc: "Excepteur sint occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit anim." },
+  ],
+  relatedCases: [],
+};
 
 export function ServiceDetail({ data }: { data: Service }) {
+  const { isDemo } = useDemo();
+  const d = isDemo ? LOREM_SERVICE : data;
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -49,32 +81,33 @@ export function ServiceDetail({ data }: { data: Service }) {
     return () => { heroTweens.forEach((t) => t.kill()); };
   }, []);
 
-  const related = CASE_STUDIES.filter((c) => data.relatedCases.includes(c.slug));
+  const related = isDemo ? [] : CASE_STUDIES.filter((c) => data.relatedCases.includes(c.slug));
   const nextService = SERVICES[(SERVICES.findIndex((s) => s.slug === data.slug) + 1) % SERVICES.length];
+  const nextSvc = isDemo ? { ...nextService, title: "Lorem Ipsum Dolor", eyebrow: "02 — LOREM IPSUM" } : nextService;
 
   return (
     <div ref={ref}>
       {/* ── Hero ── */}
       <section className="relative h-[55vh] md:h-[70vh] overflow-hidden">
-        <Image src={data.thumb} alt={data.title} fill sizes="100vw" className="svc-hero-img object-cover scale-[1.01]" priority />
+        <Image src={d.thumb} alt={d.title} fill sizes="100vw" className="svc-hero-img object-cover scale-[1.01]" priority />
         {/* Strong gradient so text stays readable at all scroll positions */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-black/20" />
         <div className="svc-hero-content absolute inset-0 flex flex-col justify-end px-6 md:px-[136px] pb-14 md:pb-24">
           <div className="flex gap-2 flex-wrap mb-4">
-            {data.tags.map((t) => <span key={t} className="chip">{t}</span>)}
+            {d.tags.map((t) => <span key={t} className="chip">{t}</span>)}
           </div>
-          <p className="font-helvetica font-bold text-xs tracking-[9px] mb-3" style={{ color: "#ef6600" }}>{data.eyebrow}</p>
+          <p className="font-helvetica font-bold text-xs tracking-[9px] mb-3" style={{ color: "#ef6600" }}>{d.eyebrow}</p>
           <h1 className="font-bricolage font-bold text-4xl md:text-[72px] leading-none tracking-[-2px] text-white max-w-[800px]">
-            {data.title}
+            {d.title}
           </h1>
-          <p className="text-base md:text-xl text-white mt-4 max-w-[640px] leading-[1.5]" style={{ opacity: 0.88 }}>{data.heroDesc}</p>
+          <p className="text-base md:text-xl text-white mt-4 max-w-[640px] leading-[1.5]" style={{ opacity: 0.88 }}>{d.heroDesc}</p>
         </div>
       </section>
 
       {/* ── Stats ── */}
       <section className="px-6 md:px-[136px] py-14 md:py-20">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {data.stats.map((s) => (
+          {d.stats.map((s) => (
             <div key={s.l} className="svc-stat flex flex-col gap-2 p-7 md:p-9 rounded-[24px]"
               style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
               <p className="font-bricolage font-extrabold text-4xl md:text-5xl leading-none tracking-[-2px] text-gradient">{s.v}</p>
@@ -92,7 +125,7 @@ export function ServiceDetail({ data }: { data: Service }) {
             <h2 className="font-bricolage font-bold text-3xl md:text-4xl leading-[1.1] tracking-tight mt-3" style={{ color: "var(--fg)" }}>
               What this service actually delivers.
             </h2>
-            {data.slug === "programmatic-display" && (
+            {d.slug === "programmatic-display" && (
               <Link
                 href="/ad-formats-demo"
                 className="btn-outline inline-flex items-center gap-2 mt-6 text-sm px-5 py-3 rounded-full"
@@ -104,7 +137,7 @@ export function ServiceDetail({ data }: { data: Service }) {
               </Link>
             )}
           </div>
-          <p className="text-base md:text-lg leading-[1.7]" style={{ color: "var(--muted)" }}>{data.longDesc}</p>
+          <p className="text-base md:text-lg leading-[1.7]" style={{ color: "var(--muted)" }}>{d.longDesc}</p>
         </div>
       </section>
 
@@ -119,7 +152,7 @@ export function ServiceDetail({ data }: { data: Service }) {
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-          {data.features.map((f) => (
+          {d.features.map((f) => (
             <div key={f.title} className="svc-feature flex flex-col gap-4 p-8 rounded-[24px]"
               style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
               <div className="w-14 h-14 rounded-full flex items-center justify-center text-xl"
@@ -134,7 +167,7 @@ export function ServiceDetail({ data }: { data: Service }) {
       </section>
 
       {/* ── HTML5 Gallery (Rich Media only) ── */}
-      {data.html5Gallery && data.html5Gallery.length > 0 && (
+      {d.html5Gallery && d.html5Gallery.length > 0 && (
         <Html5Gallery />
       )}
 
@@ -149,7 +182,7 @@ export function ServiceDetail({ data }: { data: Service }) {
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
-          {data.process.map((p) => (
+          {d.process.map((p) => (
             <div key={p.num} className="svc-step flex flex-col gap-6 p-8 rounded-[24px]"
               style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
               <p className="font-bricolage font-extrabold text-[64px] leading-none tracking-[-2px] text-gradient">{p.num}</p>
@@ -194,14 +227,14 @@ export function ServiceDetail({ data }: { data: Service }) {
       {/* ── Next service ── */}
       <section className="px-6 md:px-[136px] py-10 md:py-16">
         <p className="font-helvetica font-bold text-xs tracking-[9px] mb-6" style={{ color: "#ef6600" }}>NEXT SERVICE</p>
-        <Link href={`/solutions/${nextService.slug}`}>
+        <Link href={`/solutions/${nextSvc.slug}`}>
           <article className="svc-case group relative rounded-[28px] overflow-hidden h-[220px] md:h-[280px]">
-            <Image src={nextService.thumb} alt={nextService.title} fill sizes="100vw"
+            <Image src={nextSvc.thumb} alt={nextSvc.title} fill sizes="100vw"
               className="object-cover scale-[1.01] transition-transform duration-700 group-hover:scale-[1.06]" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
             <div className="absolute inset-0 flex flex-col justify-end p-8">
-              <p className="text-xs font-bold tracking-[6px] text-white/60 uppercase mb-2">{nextService.eyebrow}</p>
-              <h3 className="font-bricolage font-bold text-2xl md:text-4xl text-white tracking-tight">{nextService.title}</h3>
+              <p className="text-xs font-bold tracking-[6px] text-white/60 uppercase mb-2">{nextSvc.eyebrow}</p>
+              <h3 className="font-bricolage font-bold text-2xl md:text-4xl text-white tracking-tight">{nextSvc.title}</h3>
             </div>
           </article>
         </Link>

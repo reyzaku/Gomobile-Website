@@ -3,6 +3,7 @@ import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { addReveal } from "../utils/scrollReveal";
+import { useDemo } from "../context/DemoMode";
 
 const STATS = [
   { v: "9", s: "yrs", l: "In Operation" },
@@ -49,7 +50,41 @@ const TEAM = [
   { name: "Sarah Lim", role: "Director, Brand Partnerships", initials: "SL" },
 ];
 
+const LOREM_STATS = [
+  { v: "9", s: "yrs", l: "Lorem Ipsum" },
+  { v: "2400", s: "+", l: "Adipiscing Elit" },
+  { v: "120", s: "+", l: "Consectetur Inc" },
+  { v: "24", s: "", l: "Sed Do Eiusmod" },
+];
+
+const LOREM_VALUES = [
+  { icon: "🎯", title: "Lorem ipsum dolor sit", desc: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna." },
+  { icon: "🔬", title: "Adipiscing elit tempor", desc: "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat." },
+  { icon: "🤝", title: "Consectetur incididunt", desc: "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur." },
+];
+
+const LOREM_TIMELINE = [
+  { y: "2016", t: "Lorem ipsum dolor", d: "Consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore." },
+  { y: "2018", t: "Adipiscing elit sit", d: "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi." },
+  { y: "2020", t: "Tempor incididunt ut", d: "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum." },
+  { y: "2022", t: "Labore et dolore magna", d: "Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia." },
+  { y: "2024", t: "Consectetur sit amet", d: "Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit." },
+  { y: "2025", t: "Adipiscing lorem ipsum", d: "At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis." },
+];
+
+const LOREM_TEAM = [
+  { name: "Lorem Ipsum", role: "Lorem & Dolor", initials: "LI" },
+  { name: "Adipiscing Elit", role: "Sit Amet Consectetur", initials: "AE" },
+  { name: "Tempor Incididunt", role: "Ut Labore", initials: "TI" },
+  { name: "Dolore Magna", role: "Aliqua Enim", initials: "DM" },
+  { name: "Quis Nostrud", role: "Exercitation Ullamco", initials: "QN" },
+  { name: "Laboris Nisi", role: "Ut Aliquip", initials: "LN" },
+  { name: "Commodo Consequat", role: "Duis Aute", initials: "CC" },
+  { name: "Irure Dolor", role: "In Reprehenderit", initials: "ID" },
+];
+
 export function AboutBody() {
+  const { isDemo } = useDemo();
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -96,7 +131,7 @@ export function AboutBody() {
           className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-2 rounded-[28px] p-8 md:p-10"
           style={{ background: "var(--card)", border: "1px solid var(--border)" }}
         >
-          {STATS.map((s) => (
+          {(isDemo ? LOREM_STATS : STATS).map((s) => (
             <div key={s.l} className="about-stat flex flex-col items-start gap-2">
               <p
                 className="about-stat-value font-bricolage font-extrabold text-5xl md:text-[64px] leading-none tracking-[-2.88px] text-gradient"
@@ -118,15 +153,15 @@ export function AboutBody() {
         <div className="section-header flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10">
           <div>
             <p className="font-helvetica font-bold text-xs tracking-[9px]" style={{ color: "#ef6600" }}>
-              WHAT WE BELIEVE
+              {isDemo ? 'LOREM IPSUM' : 'WHAT WE BELIEVE'}
             </p>
             <h2 className="font-bricolage font-bold text-3xl md:text-4xl leading-[1.1] tracking-tight mt-2" style={{ color: "var(--fg)" }}>
-              Three things we<br />never compromise on.
+              {isDemo ? <>Lorem ipsum dolor<br />sit amet.</> : <>Three things we<br />never compromise on.</>}
             </h2>
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-          {VALUES.map((v) => (
+          {(isDemo ? LOREM_VALUES : VALUES).map((v) => (
             <div
               key={v.title}
               className="value-card flex flex-col gap-5 p-10 rounded-[28px] min-h-[280px]"
@@ -153,17 +188,17 @@ export function AboutBody() {
       <section className="px-6 md:px-[136px] py-16 md:py-24">
         <div className="section-header mb-12">
           <p className="font-helvetica font-bold text-xs tracking-[9px]" style={{ color: "#ef6600" }}>
-            OUR JOURNEY
+            {isDemo ? 'LOREM IPSUM' : 'OUR JOURNEY'}
           </p>
           <h2 className="font-bricolage font-bold text-3xl md:text-4xl leading-[1.1] tracking-tight mt-2" style={{ color: "var(--fg)" }}>
-            Nine years of building<br />in public.
+            {isDemo ? <>Lorem ipsum dolor<br />sit amet.</> : <>Nine years of building<br />in public.</>}
           </h2>
         </div>
 
         <div className="relative">
           <div className="absolute left-[14px] md:left-[80px] top-2 bottom-2 w-px" style={{ background: "var(--border)" }} />
           <div className="flex flex-col gap-10">
-            {TIMELINE.map((t) => (
+            {(isDemo ? LOREM_TIMELINE : TIMELINE).map((t) => (
               <div key={t.y} className="timeline-item grid grid-cols-[40px_1fr] md:grid-cols-[100px_1fr] gap-6 md:gap-10 items-start">
                 <div className="flex flex-col items-start">
                   <div
@@ -196,18 +231,18 @@ export function AboutBody() {
         <div className="section-header flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10">
           <div>
             <p className="font-helvetica font-bold text-xs tracking-[9px]" style={{ color: "#ef6600" }}>
-              THE PEOPLE
+              {isDemo ? 'LOREM IPSUM' : 'THE PEOPLE'}
             </p>
             <h2 className="font-bricolage font-bold text-3xl md:text-4xl leading-[1.1] tracking-tight mt-2" style={{ color: "var(--fg)" }}>
-              Operators, engineers,<br />and trade nerds.
+              {isDemo ? <>Lorem ipsum<br />adipiscing elit.</> : <>Operators, engineers,<br />and trade nerds.</>}
             </h2>
           </div>
           <p className="max-w-[340px] text-base leading-[1.5]" style={{ color: "var(--muted)" }}>
-            A 60-person team across strategy, trading, creative tech, and engineering — most of us have been on both the buy and sell side.
+            {isDemo ? 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore.' : 'A 60-person team across strategy, trading, creative tech, and engineering — most of us have been on both the buy and sell side.'}
           </p>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {TEAM.map((m) => (
+          {(isDemo ? LOREM_TEAM : TEAM).map((m) => (
             <div
               key={m.name}
               className="team-card flex flex-col items-center gap-4 p-6 md:p-8 rounded-[28px] text-center"

@@ -6,8 +6,45 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { addReveal } from "../../utils/scrollReveal";
 import { CaseStudy, CASE_STUDIES } from "../data";
+import { useDemo } from "../../context/DemoMode";
+
+const LOREM_CASE: CaseStudy = {
+  slug: "lorem-ipsum",
+  brand: "Lorem Ipsum Corp",
+  category: "Lorem",
+  headline: "Lorem ipsum dolor sit amet, consectetur adipiscing elit sed do eiusmod.",
+  img: "/assets/featured-case-1.png",
+  period: "Q3 2025 · 12 weeks",
+  tags: ["LOREM", "IPSUM", "DOLOR"],
+  metrics: [
+    { v: "+38%", l: "Lorem Ipsum",    desc: "Consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore." },
+    { v: "2.4×", l: "Dolor Sit",      desc: "Ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi." },
+    { v: "12M",  l: "Amet Consect",   desc: "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum." },
+    { v: "92%",  l: "Adipiscing VCR", desc: "Excepteur sint occaecat cupidatat non proident sunt in culpa qui officia." },
+  ],
+  overview: {
+    challenge: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam quis nostrud exercitation.",
+    solution: "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident sunt in culpa.",
+    result: "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium totam rem aperiam eaque ipsa quae ab illo inventore veritatis.",
+  },
+  keyTakeaway: "Lorem ipsum dolor sit amet consectetur.",
+  approach: [
+    { title: "Lorem Ipsum Architecture", desc: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua enim veniam." },
+    { title: "Dolor Sit Amet Sequencing", desc: "Ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat duis aute irure dolor." },
+    { title: "Consectetur Media Mix", desc: "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur excepteur sint occaecat cupidatat." },
+    { title: "Adipiscing Brand Safety", desc: "Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum lorem ipsum dolor." },
+  ],
+  channels: ["Lorem", "Ipsum", "Dolor", "Sit Amet"],
+  testimonial: {
+    quote: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua — and the results backed it up.",
+    name: "Lorem Ipsum",
+    role: "Head of Lorem, Dolor Sit Corp",
+  },
+};
 
 export function CaseStudyDetail({ data }: { data: CaseStudy }) {
+  const { isDemo } = useDemo();
+  const d = isDemo ? LOREM_CASE : data;
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -71,15 +108,16 @@ export function CaseStudyDetail({ data }: { data: CaseStudy }) {
     };
   }, []);
 
-  const next = CASE_STUDIES[(CASE_STUDIES.findIndex((c) => c.slug === data.slug) + 1) % CASE_STUDIES.length];
+  const nextCase = CASE_STUDIES[(CASE_STUDIES.findIndex((c) => c.slug === data.slug) + 1) % CASE_STUDIES.length];
+  const next = isDemo ? { ...nextCase, brand: "Lorem Ipsum Corp", headline: "Lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod.", tags: nextCase.tags } : nextCase;
 
   return (
     <div ref={ref}>
       {/* ── Hero ── */}
       <section className="relative h-[60vh] md:h-[75vh] overflow-hidden">
         <Image
-          src={data.img}
-          alt={data.brand}
+          src={d.img}
+          alt={d.brand}
           fill
           sizes="100vw"
           className="cs-hero-img object-cover scale-[1.01]"
@@ -88,22 +126,22 @@ export function CaseStudyDetail({ data }: { data: CaseStudy }) {
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-black/20" />
         <div className="cs-hero-content absolute inset-0 flex flex-col justify-end px-6 md:px-[136px] pb-14 md:pb-24">
           <div className="flex gap-2 flex-wrap mb-4">
-            {data.tags.map((t) => <span key={t} className="chip">{t}</span>)}
+            {d.tags.map((t) => <span key={t} className="chip">{t}</span>)}
           </div>
           <h1 className="font-bricolage font-bold text-4xl md:text-[64px] leading-none tracking-[-2px] text-white max-w-[900px]">
-            {data.brand}
+            {d.brand}
           </h1>
           <p className="text-base md:text-xl text-white mt-3 max-w-[700px] leading-[1.5]" style={{ opacity: 0.88 }}>
-            {data.headline}
+            {d.headline}
           </p>
-          <p className="text-sm text-white/50 mt-4 font-helvetica tracking-[2px] uppercase">{data.period}</p>
+          <p className="text-sm text-white/50 mt-4 font-helvetica tracking-[2px] uppercase">{d.period}</p>
         </div>
       </section>
 
       {/* ── Metrics strip ── */}
       <section className="px-6 md:px-[136px] py-14 md:py-20">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {data.metrics.map((m) => (
+          {d.metrics.map((m) => (
             <div
               key={m.l}
               className="cs-metric flex flex-col gap-3 p-7 md:p-9 rounded-[24px]"
@@ -128,9 +166,9 @@ export function CaseStudyDetail({ data }: { data: CaseStudy }) {
       <section className="px-6 md:px-[136px] py-10 md:py-16">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {[
-            { label: "CHALLENGE", text: data.overview.challenge },
-            { label: "SOLUTION",  text: data.overview.solution },
-            { label: "RESULT",    text: data.overview.result },
+            { label: "CHALLENGE", text: d.overview.challenge },
+            { label: "SOLUTION",  text: d.overview.solution },
+            { label: "RESULT",    text: d.overview.result },
           ].map((o) => (
             <div
               key={o.label}
@@ -153,7 +191,7 @@ export function CaseStudyDetail({ data }: { data: CaseStudy }) {
           </h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {data.approach.map((a, i) => (
+          {d.approach.map((a, i) => (
             <div
               key={a.title}
               className="cs-approach flex flex-col gap-4 p-8 md:p-10 rounded-[24px]"
@@ -183,14 +221,14 @@ export function CaseStudyDetail({ data }: { data: CaseStudy }) {
           style={{ background: "var(--card)", border: "1px solid var(--border)" }}
         >
           <p className="font-helvetica font-bold text-xs tracking-[6px] mr-4" style={{ color: "#ef6600" }}>CHANNELS USED</p>
-          {data.channels.map((c) => (
+          {d.channels.map((c) => (
             <span key={c} className="chip">{c}</span>
           ))}
         </div>
       </section>
 
       {/* ── Testimonial ── */}
-      {data.testimonial && (
+      {d.testimonial && (
         <section className="px-6 md:px-[136px] py-10 md:py-16">
           <div
             className="cs-section relative rounded-[28px] p-10 md:p-16 overflow-hidden"
@@ -202,18 +240,18 @@ export function CaseStudyDetail({ data }: { data: CaseStudy }) {
             />
             <p className="text-5xl text-gradient mb-6 leading-none">"</p>
             <p className="font-bricolage font-semibold text-xl md:text-2xl leading-[1.4] max-w-[720px]" style={{ color: "var(--fg)" }}>
-              {data.testimonial.quote}
+              {d.testimonial.quote}
             </p>
             <div className="flex items-center gap-4 mt-8">
               <div
                 className="w-12 h-12 rounded-full flex items-center justify-center text-sm font-bold text-white"
                 style={{ background: "linear-gradient(135deg, #ef6600, #cb0000)" }}
               >
-                {data.testimonial.name.split(" ").map((n) => n[0]).join("")}
+                {d.testimonial.name.split(" ").map((n) => n[0]).join("")}
               </div>
               <div>
-                <p className="font-bold text-sm" style={{ color: "var(--fg)" }}>{data.testimonial.name}</p>
-                <p className="text-xs mt-0.5" style={{ color: "var(--muted)" }}>{data.testimonial.role}</p>
+                <p className="font-bold text-sm" style={{ color: "var(--fg)" }}>{d.testimonial.name}</p>
+                <p className="text-xs mt-0.5" style={{ color: "var(--muted)" }}>{d.testimonial.role}</p>
               </div>
             </div>
           </div>
