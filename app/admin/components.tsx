@@ -159,8 +159,8 @@ export function AdminHeader({
   onCancel: () => void;
 }) {
   return (
-    <header className="sticky top-0 z-50 border-b border-white/[0.07] bg-[#0a0a0a]/95 backdrop-blur-xl">
-      <div className="max-w-3xl mx-auto px-6 h-14 flex items-center justify-between">
+    <header className="sticky top-0 z-50 border-b border-white/[0.07] bg-[#0a0a0a]/95 backdrop-blur-xl shrink-0">
+      <div className="px-6 h-14 flex items-center justify-between">
         <div className="flex items-center gap-2 text-sm overflow-hidden">
           {breadcrumbs.map((crumb, i) => (
             <span key={i} className="flex items-center gap-2 min-w-0">

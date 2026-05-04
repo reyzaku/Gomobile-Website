@@ -35,7 +35,8 @@ const defaultBlog: BlogPost = {
     year: 'numeric',
   }),
   readTime: '5 min read',
-  body: { intro: '', sections: [{ heading: '', content: '' }], conclusion: '' },
+  body: { intro: '', sections: [], conclusion: '' },
+  blocks: [],
   tags: [],
   relatedSlugs: [],
 };
