@@ -231,7 +231,7 @@ export default function CaseStudyEditor({ initial, onSave, onCancel }: Props) {
             </p>
           </div>
 
-          <div className="flex-1 overflow-y-auto px-4">
+          <div className="flex-1 min-h-0 overflow-y-auto px-4">
             {/* Cover image */}
             <SidebarSection title="Cover Image">
               <select

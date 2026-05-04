@@ -7,6 +7,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Arrow } from "./Hero";
 import { MagneticButton } from "./MagneticButton";
 import { addReveal } from "../utils/scrollReveal";
+import { useDemo } from "../context/DemoMode";
 
 const SERVICES = [
   {
@@ -39,7 +40,19 @@ const SERVICES = [
   },
 ];
 
+const LOREM_SERVICES = [
+  { slug: "programmatic-display", thumb: "/assets/service-thumb-programmatic.png",
+    title: "Lorem Ipsum Display", desc: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua ut enim.", tags: ["LOREM", "IPSUM", "DOLOR"] },
+  { slug: "video-ctv-ott", thumb: "/assets/service-thumb-video.png",
+    title: "Dolor Sit & Amet", desc: "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat duis.", tags: ["LOREM", "AMET", "DOLOR"] },
+  { slug: "rich-media-html5", thumb: "/assets/service-thumb-richmedia.png",
+    title: "Consectetur Adipiscing", desc: "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur excepteur.", tags: ["LOREM", "ELIT", "IPSUM"] },
+  { slug: "social-media", thumb: "/assets/service-thumb-social.png",
+    title: "Sed Eiusmod Tempor", desc: "Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.", tags: ["LOREM", "IPSUM", "DOLOR"] },
+];
+
 export function Services() {
+  const { isDemo } = useDemo();
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -84,19 +97,21 @@ export function Services() {
       <div className="services-header flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10">
         <div>
           <p className="font-helvetica font-bold text-xs tracking-[9px]" style={{ color: "#ef6600" }}>
-            WHAT WE DO
+            {isDemo ? 'LOREM IPSUM' : 'WHAT WE DO'}
           </p>
           <h2 className="font-bricolage font-bold text-3xl md:text-4xl leading-[1.1] tracking-tight mt-2" style={{ color: "var(--fg)" }}>
-            Full-cycle digital<br />advertising solutions.
+            {isDemo ? <>Lorem ipsum dolor<br />sit amet consectetur.</> : <>Full-cycle digital<br />advertising solutions.</>}
           </h2>
         </div>
         <p className="max-w-[317px] text-base leading-[1.5]" style={{ color: "var(--muted)" }}>
-          From programmatic buying to rich media production, we cover every layer of your digital campaign.
+          {isDemo
+            ? 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore magna.'
+            : 'From programmatic buying to rich media production, we cover every layer of your digital campaign.'}
         </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        {SERVICES.map((s) => (
+        {(isDemo ? LOREM_SERVICES : SERVICES).map((s) => (
           <Link key={s.title} href={`/solutions/${s.slug}`}>
           <article
             className="service-card relative rounded-[28px] overflow-hidden h-[420px] md:h-[516px] flex flex-col justify-end p-8"

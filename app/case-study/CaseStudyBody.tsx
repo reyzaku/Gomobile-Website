@@ -5,6 +5,8 @@ import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { addReveal } from "../utils/scrollReveal";
+import { useDemo } from "../context/DemoMode";
+import { LOREM_CASES } from "../demo/lorem-data";
 
 const CATEGORIES = ["All", "Travel", "FMCG", "Banking", "Tech", "Lifestyle"];
 
@@ -90,10 +92,12 @@ const CASES = [
 ];
 
 export function CaseStudyBody() {
+  const { isDemo } = useDemo();
   const ref = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState("All");
 
-  const filtered = active === "All" ? CASES : CASES.filter((c) => c.category === active);
+  const allCases = isDemo ? LOREM_CASES : CASES;
+  const filtered = active === "All" ? allCases : allCases.filter((c) => c.category === active);
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);

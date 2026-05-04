@@ -7,16 +7,25 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Arrow } from "./Hero";
 import { MagneticButton } from "./MagneticButton";
 import { addReveal } from "../utils/scrollReveal";
+import { useDemo } from "../context/DemoMode";
 
 const CASES = [
   { img: "/assets/featured-case-1.png", title: "Singapore Airlines", slug: "singapore-airlines" },
   { img: "/assets/featured-case-2.png", title: "Indofood",           slug: "indofood" },
   { img: "/assets/featured-case-3.png", title: "Bank Jago",          slug: "bank-jago" },
 ];
+const LOREM_CASES_HOME = [
+  { img: "/assets/featured-case-1.png", title: "Lorem Ipsum Corp",       slug: "singapore-airlines" },
+  { img: "/assets/featured-case-2.png", title: "Adipiscing Elit Ltd",     slug: "indofood" },
+  { img: "/assets/featured-case-3.png", title: "Consectetur Inc",         slug: "bank-jago" },
+];
 const DESC =
   "Reach your audience with precision across premium publisher networks display, native, and in-app placements powered by our GoNet DSP.";
+const LOREM_DESC =
+  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
 
 export function CaseStudies() {
+  const { isDemo } = useDemo();
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -73,19 +82,19 @@ export function CaseStudies() {
       <div className="cases-header flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10">
         <div>
           <p className="font-helvetica font-bold text-xs tracking-[9px]" style={{ color: "#ef6600" }}>
-            CASE STUDIES
+            {isDemo ? 'LOREM IPSUM' : 'CASE STUDIES'}
           </p>
           <h2 className="font-bricolage font-bold text-3xl md:text-4xl leading-[1.1] tracking-tight mt-2" style={{ color: "var(--fg)" }}>
-            Campaigns that<br />moved the numbers.
+            {isDemo ? <>Lorem ipsum dolor<br />sit amet.</> : <>Campaigns that<br />moved the numbers.</>}
           </h2>
         </div>
         <p className="max-w-[317px] text-base leading-[1.5]" style={{ color: "var(--muted)" }}>
-          Real briefs, real budgets, real results. See how we turned campaign goals into numbers worth talking about.
+          {isDemo ? LOREM_DESC : 'From programmatic buying to rich media production, we cover every layer of your digital campaign.'}
         </p>
       </div>
 
       <div className="flex flex-col gap-3">
-        {CASES.map((c) => (
+        {(isDemo ? LOREM_CASES_HOME : CASES).map((c) => (
           <Link key={c.title} href={`/case-study/${c.slug}`}>
           <article className="case-card relative rounded-[28px] overflow-hidden h-[320px] md:h-[391px]">
             <Image src={c.img} alt={c.title} fill sizes="100vw" className="object-cover scale-[1.01]" />
@@ -94,7 +103,7 @@ export function CaseStudies() {
               <h3 className="font-bricolage font-bold text-3xl md:text-4xl leading-[1.1] tracking-tight text-white">
                 {c.title}
               </h3>
-              <p className="text-sm md:text-base text-white/90 mt-3 leading-[1.5]">{DESC}</p>
+              <p className="text-sm md:text-base text-white/90 mt-3 leading-[1.5]">{isDemo ? LOREM_DESC : DESC}</p>
               <div className="flex gap-1.5 mt-4">
                 <span className="rounded-full px-4 py-1 text-xs font-normal text-white bg-brand-gradient">CPM</span>
                 <span className="rounded-full px-4 py-1 text-xs font-normal text-white bg-brand-gradient">NATIVE ADS</span>

@@ -4,6 +4,8 @@ import "./globals.css";
 import { ThemeProvider } from "./components/ThemeProvider";
 import { Cursor } from "./components/Cursor";
 import { SmoothScroll } from "./components/SmoothScroll";
+import { DemoModeProvider } from "./context/DemoMode";
+import { DemoToggle } from "./components/DemoToggle";
 
 const bricolage = Bricolage_Grotesque({
   subsets: ["latin"],
@@ -39,11 +41,14 @@ export default function RootLayout({
       className={`${bricolage.variable} ${nunito.variable} ${nunitoSans.variable}`}
     >
       <body className="font-nunitoSans antialiased">
-        <ThemeProvider>
-          <SmoothScroll />
-          <Cursor />
-          {children}
-        </ThemeProvider>
+        <DemoModeProvider>
+          <ThemeProvider>
+            <SmoothScroll />
+            <Cursor />
+            {children}
+            <DemoToggle />
+          </ThemeProvider>
+        </DemoModeProvider>
       </body>
     </html>
   );

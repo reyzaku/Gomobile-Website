@@ -1,14 +1,20 @@
 "use client";
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
+import { useDemo } from "../context/DemoMode";
 
 interface PageHeroProps {
   eyebrow: string;
   title: React.ReactNode;
   lede?: string;
+  /** Optional lorem overrides — shown when demo mode is active */
+  loremEyebrow?: string;
+  loremTitle?: React.ReactNode;
+  loremLede?: string;
 }
 
-export function PageHero({ eyebrow, title, lede }: PageHeroProps) {
+export function PageHero({ eyebrow, title, lede, loremEyebrow, loremTitle, loremLede }: PageHeroProps) {
+  const { isDemo } = useDemo();
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -21,6 +27,14 @@ export function PageHero({ eyebrow, title, lede }: PageHeroProps) {
     return () => ctx.revert();
   }, []);
 
+  const displayEyebrow = isDemo ? (loremEyebrow ?? 'LOREM IPSUM') : eyebrow;
+  const displayTitle   = isDemo
+    ? (loremTitle ?? <>Lorem ipsum dolor<br /><span className="text-gradient-animated">sit amet</span>.</>)
+    : title;
+  const displayLede    = isDemo
+    ? (loremLede ?? (lede ? 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.' : undefined))
+    : lede;
+
   return (
     <section
       ref={ref}
@@ -30,20 +44,20 @@ export function PageHero({ eyebrow, title, lede }: PageHeroProps) {
         className="ph-eyebrow font-helvetica font-bold text-xs tracking-[9px] mb-4"
         style={{ color: "#ef6600" }}
       >
-        {eyebrow}
+        {displayEyebrow}
       </p>
       <h1
         className="ph-title font-bricolage font-semibold text-5xl md:text-[80px] leading-none tracking-[-2.88px] max-w-[900px]"
         style={{ color: "var(--fg)" }}
       >
-        {title}
+        {displayTitle}
       </h1>
-      {lede && (
+      {displayLede && (
         <p
           className="ph-lede mt-8 max-w-[640px] font-nunitoSans text-base md:text-lg leading-[1.5]"
           style={{ color: "var(--muted)" }}
         >
-          {lede}
+          {displayLede}
         </p>
       )}
     </section>

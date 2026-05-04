@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { MagneticButton } from "./MagneticButton";
 import Link from "next/link";
+import { useDemo } from "../context/DemoMode";
 
 const STATS = [
   { value: "2400+", label: "TOTAL CAMPAIGN\nLAUNCHED" },
@@ -26,6 +27,7 @@ function Accolade({ logo, alt, rank, label, w }: { logo: string; alt: string; ra
 
 export function Hero() {
   const { theme } = useTheme();
+  const { isDemo } = useDemo();
   const mode = theme === "dark" ? "darkmode" : "lightmode";
   const heroRef = useRef<HTMLDivElement>(null);
 
@@ -120,11 +122,23 @@ export function Hero() {
           className="font-bricolage font-semibold text-[40px] leading-none tracking-[-2px] text-center w-full"
           style={{ color: "var(--fg)" }}
         >
-          <span className="hero-line block">Your Ads.</span>
-          <span className="hero-line block">The Right People.</span>
-          <span className="hero-line block">
-            Real <span className="text-gradient-animated">Growth</span>.
-          </span>
+          {isDemo ? (
+            <>
+              <span className="hero-line block">Lorem Ipsum.</span>
+              <span className="hero-line block">Dolor Sit Amet.</span>
+              <span className="hero-line block">
+                Consectetur <span className="text-gradient-animated">Adipiscing</span>.
+              </span>
+            </>
+          ) : (
+            <>
+              <span className="hero-line block">Your Ads.</span>
+              <span className="hero-line block">The Right People.</span>
+              <span className="hero-line block">
+                Real <span className="text-gradient-animated">Growth</span>.
+              </span>
+            </>
+          )}
         </h1>
 
         {/* Stats card */}
@@ -158,8 +172,9 @@ export function Hero() {
         {/* Description + CTA */}
         <div className="flex flex-col gap-4 items-center text-center w-full max-w-[344px]">
           <p className="font-nunitoSans text-sm leading-[1.5] tracking-tight" style={{ color: "var(--fg)" }}>
-            We are digital marketing agency that specializes in performance buying and programmatic advertising.
-            We help brands reach their audience across every screen, and prove that it worked.
+            {isDemo
+              ? "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam."
+              : "We are digital marketing agency that specializes in performance buying and programmatic advertising. We help brands reach their audience across every screen, and prove that it worked."}
           </p>
           <Link href="/case-study">
             <MagneticButton className="btn-primary w-fit h-[48px]">
@@ -186,11 +201,23 @@ export function Hero() {
         {/* Left */}
         <div className="flex flex-col justify-between min-h-[569px] max-w-[676px]">
           <h1 className="font-bricolage font-semibold text-[80px] leading-none tracking-[-2.88px]" style={{ color: "var(--fg)" }}>
-            <span className="hero-line block">Your Ads.</span>
-            <span className="hero-line block">The Right People.</span>
-            <span className="hero-line block">
-              Real <span className="text-gradient-animated">Growth</span>.
-            </span>
+            {isDemo ? (
+              <>
+                <span className="hero-line block">Lorem Ipsum.</span>
+                <span className="hero-line block">Dolor Sit Amet.</span>
+                <span className="hero-line block">
+                  Consectetur <span className="text-gradient-animated">Adipiscing</span>.
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="hero-line block">Your Ads.</span>
+                <span className="hero-line block">The Right People.</span>
+                <span className="hero-line block">
+                  Real <span className="text-gradient-animated">Growth</span>.
+                </span>
+              </>
+            )}
           </h1>
 
           <div className="flex flex-wrap gap-5 items-center mt-10">
@@ -243,8 +270,9 @@ export function Hero() {
 
           <div className="flex flex-col gap-[22px]">
             <p className="font-nunitoSans text-base leading-[1.5] tracking-tight" style={{ color: "var(--fg)" }}>
-              We are digital marketing agency that specializes in performance buying and programmatic advertising.
-              We help brands reach their audience across every screen, and prove that it worked.
+              {isDemo
+                ? "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam."
+                : "We are digital marketing agency that specializes in performance buying and programmatic advertising. We help brands reach their audience across every screen, and prove that it worked."}
             </p>
             <Link href="/case-study">
               <MagneticButton className="btn-primary w-fit h-[52px]">

@@ -6,14 +6,21 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { addReveal } from "../utils/scrollReveal";
 import { BLOG_POSTS, FEATURED_POST } from "./data";
+import { useDemo } from "../context/DemoMode";
+import { LOREM_BLOG_POSTS } from "../demo/lorem-data";
 
 const TOPICS = ["All", "Programmatic", "Creative", "CTV", "Measurement", "Industry"];
 
 export function BlogBody() {
+  const { isDemo } = useDemo();
   const ref = useRef<HTMLDivElement>(null);
   const [topic, setTopic] = useState("All");
 
-  const filtered = topic === "All" ? BLOG_POSTS : BLOG_POSTS.filter((p) => p.category === topic);
+  // Swap entire dataset when demo mode is active
+  const allPosts   = isDemo ? LOREM_BLOG_POSTS : BLOG_POSTS;
+  const featuredPost = isDemo ? LOREM_BLOG_POSTS[0] : FEATURED_POST;
+
+  const filtered = topic === "All" ? allPosts : allPosts.filter((p) => p.category === topic);
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
@@ -37,15 +44,15 @@ export function BlogBody() {
     <div ref={ref}>
       {/* Featured */}
       <section className="px-6 md:px-[136px] pb-12 md:pb-20">
-        <Link href={`/blog/${FEATURED_POST.slug}`}>
+        <Link href={`/blog/${featuredPost.slug}`}>
           <article
             className="featured-card group relative grid grid-cols-1 lg:grid-cols-[1.1fr_1fr] gap-0 rounded-[28px] overflow-hidden cursor-pointer"
             style={{ background: "var(--card)", border: "1px solid var(--border)" }}
           >
             <div className="relative h-[280px] md:h-[480px] overflow-hidden">
               <Image
-                src={FEATURED_POST.img}
-                alt={FEATURED_POST.title}
+                src={featuredPost.img}
+                alt={featuredPost.title}
                 fill
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 className="object-cover scale-[1.01] transition-transform duration-700 group-hover:scale-[1.06]"
@@ -56,14 +63,14 @@ export function BlogBody() {
                 <div className="flex items-center gap-3">
                   <span className="chip">FEATURED</span>
                   <span className="text-[11px] font-bold tracking-[2px] uppercase" style={{ color: "var(--muted)" }}>
-                    {FEATURED_POST.category}
+                    {featuredPost.category}
                   </span>
                 </div>
                 <h2 className="font-bricolage font-bold text-3xl md:text-[40px] leading-[1.1] tracking-tight" style={{ color: "var(--fg)" }}>
-                  {FEATURED_POST.title}
+                  {featuredPost.title}
                 </h2>
                 <p className="text-base md:text-lg leading-[1.55]" style={{ color: "var(--muted)" }}>
-                  {FEATURED_POST.excerpt}
+                  {featuredPost.excerpt}
                 </p>
               </div>
               <div className="flex items-center gap-3 pt-6" style={{ borderTop: "1px solid var(--border)" }}>
@@ -71,14 +78,14 @@ export function BlogBody() {
                   className="w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold text-white"
                   style={{ background: "linear-gradient(135deg, #ef6600, #cb0000)" }}
                 >
-                  {FEATURED_POST.author.split(" ").map((n) => n[0]).join("")}
+                  {featuredPost.author.split(" ").map((n) => n[0]).join("")}
                 </div>
                 <div className="flex flex-col">
                   <p className="text-sm font-bold" style={{ color: "var(--fg)" }}>
-                    {FEATURED_POST.author}
+                    {featuredPost.author}
                   </p>
                   <p className="text-xs" style={{ color: "var(--muted)" }}>
-                    {FEATURED_POST.date} · {FEATURED_POST.readTime}
+                    {featuredPost.date} · {featuredPost.readTime}
                   </p>
                 </div>
               </div>

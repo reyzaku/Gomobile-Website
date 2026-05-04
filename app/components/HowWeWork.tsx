@@ -3,6 +3,7 @@ import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { addReveal } from "../utils/scrollReveal";
+import { useDemo } from "../context/DemoMode";
 
 const STEPS = [
   {
@@ -27,7 +28,15 @@ const STEPS = [
   },
 ];
 
+const LOREM_STEPS = [
+  { num: "01", title: "Lorem & Ipsum", desc: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua." },
+  { num: "02", title: "Dolor Sit Amet", desc: "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat duis aute." },
+  { num: "03", title: "Consectetur Adipiscing", desc: "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur sint occaecat." },
+  { num: "04", title: "Sed Eiusmod Tempor", desc: "Excepteur sint occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit anim id est laborum lorem." },
+];
+
 export function HowWeWork() {
+  const { isDemo } = useDemo();
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -107,13 +116,13 @@ export function HowWeWork() {
       <div className="hww-header flex flex-col md:flex-row md:items-end gap-4 mb-10 md:mb-14">
         <div>
           <p className="font-helvetica font-bold text-xs tracking-[9px]" style={{ color: "#ef6600" }}>
-            HOW WE WORK
+            {isDemo ? 'LOREM IPSUM' : 'HOW WE WORK'}
           </p>
           <h2
             className="font-bricolage font-bold text-3xl md:text-4xl leading-[1.1] tracking-tight mt-2"
             style={{ color: "var(--fg)" }}
           >
-            Four steps from brief<br />to results.
+            {isDemo ? <>Lorem ipsum dolor<br />sit amet.</> : <>Four steps from brief<br />to results.</>}
           </h2>
         </div>
       </div>
@@ -138,7 +147,7 @@ export function HowWeWork() {
           ))}
 
           {/* 4 dots — centered above each column */}
-          {STEPS.map((_, i) => (
+          {(isDemo ? LOREM_STEPS : STEPS).map((_, i) => (
             <div
               key={i}
               className="hww-dot absolute top-1/2 -translate-x-1/2 -translate-y-1/2 w-5 h-5 rounded-full flex items-center justify-center"
@@ -159,7 +168,7 @@ export function HowWeWork() {
 
         {/* Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
-          {STEPS.map((s) => (
+          {(isDemo ? LOREM_STEPS : STEPS).map((s) => (
             <div
               key={s.num}
               className="step-card flex flex-col gap-8 px-5 md:px-[21px] py-10 md:py-[39px] rounded-[28px]"
