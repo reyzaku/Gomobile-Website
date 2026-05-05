@@ -77,6 +77,7 @@ export function Nav() {
             width={100}
             height={22}
             className="h-4 w-auto"
+            style={theme === "light" ? { filter: "drop-shadow(0 0 6px rgba(255,255,255,0.95)) drop-shadow(0 0 3px rgba(255,255,255,0.95))" } : undefined}
             priority
           />
         </Link>
@@ -99,6 +100,7 @@ export function Nav() {
             width={100}
             height={22}
             className="h-5 w-auto"
+            style={theme === "light" ? { filter: "drop-shadow(0 0 6px rgba(255,255,255,0.95)) drop-shadow(0 0 3px rgba(255,255,255,0.95))" } : undefined}
             priority
           />
         </Link>
