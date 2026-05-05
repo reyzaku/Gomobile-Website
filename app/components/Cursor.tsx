@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useTheme } from "./ThemeProvider";
 
@@ -12,11 +12,13 @@ export function Cursor() {
   const delayed    = useRef({ x: -100, y: -100 });
   const raf        = useRef<number>(0);
   const hovering   = useRef(false);
+  const [isTouch, setIsTouch] = useState(false);
 
-  // Don't render on touch-only devices
-  if (typeof window !== "undefined" && window.matchMedia("(hover: none) and (pointer: coarse)").matches) {
-    return null;
-  }
+  useEffect(() => {
+    setIsTouch(window.matchMedia("(hover: none) and (pointer: coarse)").matches);
+  }, []);
+
+  if (isTouch) return null;
 
   /* ── Reset hover state on every route change ── */
   useEffect(() => {
