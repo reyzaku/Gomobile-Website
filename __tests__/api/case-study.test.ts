@@ -165,7 +165,7 @@ describe('GET /api/case-study/[slug]', () => {
     await db.collection('case_studies').insertOne({ ...VALID_CASE });
     const { GET } = await import('../../app/api/case-study/[slug]/route');
     const res = await GET(makeSlugReq('GET', VALID_CASE.slug) as any, {
-      params: { slug: VALID_CASE.slug },
+      params: Promise.resolve({ slug: VALID_CASE.slug }),
     });
     expect(res.status).toBe(200);
     const data = await res.json();
@@ -175,7 +175,7 @@ describe('GET /api/case-study/[slug]', () => {
   it('404 — unknown slug returns not found', async () => {
     const { GET } = await import('../../app/api/case-study/[slug]/route');
     const res = await GET(makeSlugReq('GET', 'no-such-case') as any, {
-      params: { slug: 'no-such-case' },
+      params: Promise.resolve({ slug: 'no-such-case' }),
     });
     expect(res.status).toBe(404);
   });
@@ -193,7 +193,7 @@ describe('PUT /api/case-study/[slug]', () => {
     const { PUT } = await import('../../app/api/case-study/[slug]/route');
     const res = await PUT(
       makeSlugReq('PUT', VALID_CASE.slug, { headline: 'Updated Headline' }, ADMIN) as any,
-      { params: { slug: VALID_CASE.slug } }
+      { params: Promise.resolve({ slug: VALID_CASE.slug }) }
     );
     expect(res.status).toBe(200);
     const data = await res.json();
@@ -204,7 +204,7 @@ describe('PUT /api/case-study/[slug]', () => {
     const { PUT } = await import('../../app/api/case-study/[slug]/route');
     const res = await PUT(
       makeSlugReq('PUT', VALID_CASE.slug, { headline: 'X' }) as any,
-      { params: { slug: VALID_CASE.slug } }
+      { params: Promise.resolve({ slug: VALID_CASE.slug }) }
     );
     expect(res.status).toBe(401);
   });
@@ -213,7 +213,7 @@ describe('PUT /api/case-study/[slug]', () => {
     const { PUT } = await import('../../app/api/case-study/[slug]/route');
     const res = await PUT(
       makeSlugReq('PUT', 'ghost', { headline: 'X' }, ADMIN) as any,
-      { params: { slug: 'ghost' } }
+      { params: Promise.resolve({ slug: 'ghost' }) }
     );
     expect(res.status).toBe(404);
   });
@@ -231,7 +231,7 @@ describe('DELETE /api/case-study/[slug]', () => {
     const { DELETE } = await import('../../app/api/case-study/[slug]/route');
     const res = await DELETE(
       makeSlugReq('DELETE', VALID_CASE.slug, undefined, ADMIN) as any,
-      { params: { slug: VALID_CASE.slug } }
+      { params: Promise.resolve({ slug: VALID_CASE.slug }) }
     );
     expect(res.status).toBe(204);
   });
@@ -240,7 +240,7 @@ describe('DELETE /api/case-study/[slug]', () => {
     const { DELETE } = await import('../../app/api/case-study/[slug]/route');
     const res = await DELETE(
       makeSlugReq('DELETE', VALID_CASE.slug) as any,
-      { params: { slug: VALID_CASE.slug } }
+      { params: Promise.resolve({ slug: VALID_CASE.slug }) }
     );
     expect(res.status).toBe(401);
   });
@@ -249,7 +249,7 @@ describe('DELETE /api/case-study/[slug]', () => {
     const { DELETE } = await import('../../app/api/case-study/[slug]/route');
     const res = await DELETE(
       makeSlugReq('DELETE', 'ghost', undefined, ADMIN) as any,
-      { params: { slug: 'ghost' } }
+      { params: Promise.resolve({ slug: 'ghost' }) }
     );
     expect(res.status).toBe(404);
   });

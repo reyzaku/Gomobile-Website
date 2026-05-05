@@ -168,7 +168,7 @@ describe('GET /api/blog/[slug]', () => {
     await db.collection('blogs').insertOne({ ...VALID_POST });
     const { GET } = await import('../../app/api/blog/[slug]/route');
     const res = await GET(makeSlugReq('GET', VALID_POST.slug) as any, {
-      params: { slug: VALID_POST.slug },
+      params: Promise.resolve({ slug: VALID_POST.slug }),
     });
     expect(res.status).toBe(200);
     const data = await res.json();
@@ -178,7 +178,7 @@ describe('GET /api/blog/[slug]', () => {
   it('404 — unknown slug returns not found', async () => {
     const { GET } = await import('../../app/api/blog/[slug]/route');
     const res = await GET(makeSlugReq('GET', 'non-existent') as any, {
-      params: { slug: 'non-existent' },
+      params: Promise.resolve({ slug: 'non-existent' }),
     });
     expect(res.status).toBe(404);
   });
@@ -196,7 +196,7 @@ describe('PUT /api/blog/[slug]', () => {
     const { PUT } = await import('../../app/api/blog/[slug]/route');
     const res = await PUT(
       makeSlugReq('PUT', VALID_POST.slug, { title: 'Updated Title' }, ADMIN) as any,
-      { params: { slug: VALID_POST.slug } }
+      { params: Promise.resolve({ slug: VALID_POST.slug }) }
     );
     expect(res.status).toBe(200);
     const data = await res.json();
@@ -207,7 +207,7 @@ describe('PUT /api/blog/[slug]', () => {
     const { PUT } = await import('../../app/api/blog/[slug]/route');
     const res = await PUT(
       makeSlugReq('PUT', VALID_POST.slug, { title: 'Updated' }) as any,
-      { params: { slug: VALID_POST.slug } }
+      { params: Promise.resolve({ slug: VALID_POST.slug }) }
     );
     expect(res.status).toBe(401);
   });
@@ -216,7 +216,7 @@ describe('PUT /api/blog/[slug]', () => {
     const { PUT } = await import('../../app/api/blog/[slug]/route');
     const res = await PUT(
       makeSlugReq('PUT', 'ghost-slug', { title: 'X' }, ADMIN) as any,
-      { params: { slug: 'ghost-slug' } }
+      { params: Promise.resolve({ slug: 'ghost-slug' }) }
     );
     expect(res.status).toBe(404);
   });
@@ -234,7 +234,7 @@ describe('DELETE /api/blog/[slug]', () => {
     const { DELETE } = await import('../../app/api/blog/[slug]/route');
     const res = await DELETE(
       makeSlugReq('DELETE', VALID_POST.slug, undefined, ADMIN) as any,
-      { params: { slug: VALID_POST.slug } }
+      { params: Promise.resolve({ slug: VALID_POST.slug }) }
     );
     expect(res.status).toBe(204);
   });
@@ -243,7 +243,7 @@ describe('DELETE /api/blog/[slug]', () => {
     const { DELETE } = await import('../../app/api/blog/[slug]/route');
     const res = await DELETE(
       makeSlugReq('DELETE', VALID_POST.slug) as any,
-      { params: { slug: VALID_POST.slug } }
+      { params: Promise.resolve({ slug: VALID_POST.slug }) }
     );
     expect(res.status).toBe(401);
   });
@@ -252,7 +252,7 @@ describe('DELETE /api/blog/[slug]', () => {
     const { DELETE } = await import('../../app/api/blog/[slug]/route');
     const res = await DELETE(
       makeSlugReq('DELETE', 'ghost-slug', undefined, ADMIN) as any,
-      { params: { slug: 'ghost-slug' } }
+      { params: Promise.resolve({ slug: 'ghost-slug' }) }
     );
     expect(res.status).toBe(404);
   });
