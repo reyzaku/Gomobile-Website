@@ -5,6 +5,7 @@ import { ContactCTA } from "../../components/ContactCTA";
 import { BackgroundGrain } from "../../components/BackgroundGrain";
 import { getService, SERVICES } from "../data";
 import { ServiceDetail } from "./ServiceDetail";
+import { getDbCaseStudies } from "@/lib/db/case-study";
 export function generateStaticParams() {
   return SERVICES.map((s) => ({ slug: s.slug }));
 }
@@ -24,11 +25,14 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
   const data = getService(slug);
   if (!data) notFound();
 
+  const allCases = await getDbCaseStudies('published');
+  const relatedCases = allCases.filter((c) => (data.relatedCases ?? []).includes(c.slug));
+
   return (
     <main className="relative min-h-screen overflow-hidden">
       <BackgroundGrain />
       <Nav />
-      <ServiceDetail data={data} />
+      <ServiceDetail data={data} relatedCases={relatedCases} />
       <ContactCTA />
       <Footer />
     </main>

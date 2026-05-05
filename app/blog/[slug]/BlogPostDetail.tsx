@@ -5,7 +5,7 @@ import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { addReveal } from "../../utils/scrollReveal";
-import { BlogPost, ContentBlock, getRelatedPosts } from "../data";
+import type { BlogPost, ContentBlock } from "@/lib/models/blog";
 
 function BlocksRenderer({ blocks }: { blocks: ContentBlock[] }) {
   return (
@@ -105,9 +105,8 @@ function BlocksRenderer({ blocks }: { blocks: ContentBlock[] }) {
   );
 }
 
-export function BlogPostDetail({ post }: { post: BlogPost }) {
+export function BlogPostDetail({ post, related = [] }: { post: BlogPost; related?: BlogPost[] }) {
   const ref  = useRef<HTMLDivElement>(null);
-  const related = getRelatedPosts(post.relatedSlugs);
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import type { CaseStudy } from '@/app/case-study/data';
+import type { CaseStudy } from '@/lib/models/case-study';
 import { Field, ChipInput, AdminHeader, inputCls } from './components';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -138,11 +138,12 @@ function MetricCard({
 
 interface Props {
   initial: CaseStudy;
-  onSave: (cs: CaseStudy) => void;
+  onSave: (cs: CaseStudy, status: 'draft' | 'published') => void;
   onCancel: () => void;
+  saving?: boolean;
 }
 
-export default function CaseStudyEditor({ initial, onSave, onCancel }: Props) {
+export default function CaseStudyEditor({ initial, onSave, onCancel, saving }: Props) {
   const [cs, setCs] = useState<CaseStudy>(() => {
     const metrics = [...initial.metrics];
     while (metrics.length < 4) metrics.push({ ...emptyMetric });
@@ -208,18 +209,21 @@ export default function CaseStudyEditor({ initial, onSave, onCancel }: Props) {
     return Object.keys(e).length === 0;
   }
 
-  function handleSave() {
+  function handleSave(status: 'draft' | 'published') {
     if (!validate()) return;
-    onSave({ ...cs, testimonial: hasTestimonial ? cs.testimonial : undefined });
+    onSave({ ...cs, testimonial: hasTestimonial ? cs.testimonial : undefined }, status);
   }
 
   return (
     <div className="h-screen bg-[#0a0a0a] text-white flex flex-col overflow-hidden">
       <AdminHeader
         breadcrumbs={['Case Studies', cs.brand || 'New Case Study']}
-        onPrimary={handleSave}
-        primaryLabel="Save Case Study"
+        onPrimary={() => handleSave('published')}
+        primaryLabel="Publish"
+        onSecondary={() => handleSave('draft')}
+        secondaryLabel="Save as Draft"
         onCancel={onCancel}
+        saving={saving}
       />
 
       <div className="flex-1 flex overflow-hidden">

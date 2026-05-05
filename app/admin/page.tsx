@@ -2,18 +2,14 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Image from 'next/image';
-import type { BlogPost } from '@/app/blog/data';
-import type { CaseStudy } from '@/app/case-study/data';
-import { BLOG_POSTS } from '@/app/blog/data';
-import { CASE_STUDIES } from '@/app/case-study/data';
+import type { BlogPost } from '@/lib/models/blog';
+import type { CaseStudy } from '@/lib/models/case-study';
 import BlogEditor from './BlogEditor';
 import CaseStudyEditor from './CaseStudyEditor';
 
 /* ─── Constants ─────────────────────────────────────────────────────────── */
 
-const ADMIN_PASS = 'gomobile@2024';
-const LS_BLOG = 'gm_admin_blogs';
-const LS_CASE = 'gm_admin_cases';
+const SS_TOKEN = 'gm_admin_token';
 
 /* ─── Types ─────────────────────────────────────────────────────────────── */
 
@@ -40,6 +36,7 @@ const defaultBlog: BlogPost = {
   blocks: [],
   tags: [],
   relatedSlugs: [],
+  status: 'draft',
 };
 
 const defaultCase: CaseStudy = {
@@ -55,6 +52,7 @@ const defaultCase: CaseStudy = {
   overview: { challenge: '', solution: '', result: '' },
   approach: [],
   testimonial: { quote: '', name: '', role: '' },
+  status: 'draft',
 };
 
 /* ─── Helpers ────────────────────────────────────────────────────────────── */
@@ -70,25 +68,40 @@ function getGreeting() {
 
 export default function AdminPage() {
   const [authed, setAuthed] = useState(false);
+  const [token, setToken] = useState('');
   const [pw, setPw] = useState('');
   const [pwErr, setPwErr] = useState('');
+  const [logging, setLogging] = useState(false);
 
   useEffect(() => {
-    if (sessionStorage.getItem('gm_admin') === '1') setAuthed(true);
+    const stored = sessionStorage.getItem(SS_TOKEN);
+    if (stored) { setToken(stored); setAuthed(true); }
   }, []);
 
-  function handleLogin(e: React.FormEvent) {
+  async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
-    if (pw === ADMIN_PASS) {
-      sessionStorage.setItem('gm_admin', '1');
+    setLogging(true);
+    try {
+      const res = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: pw }),
+      });
+      if (!res.ok) { setPwErr('Incorrect password. Try again.'); return; }
+      const { token: t } = await res.json();
+      sessionStorage.setItem(SS_TOKEN, t);
+      setToken(t);
       setAuthed(true);
-    } else {
-      setPwErr('Incorrect password. Try again.');
+    } catch {
+      setPwErr('Login failed. Please try again.');
+    } finally {
+      setLogging(false);
     }
   }
 
   function handleLogout() {
-    sessionStorage.removeItem('gm_admin');
+    sessionStorage.removeItem(SS_TOKEN);
+    setToken('');
     setAuthed(false);
     setPw('');
     setPwErr('');
@@ -181,9 +194,10 @@ export default function AdminPage() {
               </div>
               <button
                 type="submit"
-                className="w-full bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-xl py-3 text-sm font-semibold hover:opacity-90 transition-opacity"
+                disabled={logging}
+                className="w-full bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-xl py-3 text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-60"
               >
-                Sign In
+                {logging ? 'Signing in…' : 'Sign In'}
               </button>
             </div>
           </form>
@@ -192,76 +206,128 @@ export default function AdminPage() {
     );
   }
 
-  return <Dashboard onLogout={handleLogout} />;
+  return <Dashboard token={token} onLogout={handleLogout} />;
 }
 
 /* ─── Dashboard ──────────────────────────────────────────────────────────── */
 
-function Dashboard({ onLogout }: { onLogout: () => void }) {
+function Dashboard({ token, onLogout }: { token: string; onLogout: () => void }) {
   const [view, setView] = useState<View>('dashboard');
   const [activeSection, setActiveSection] = useState<Section>('overview');
   const [editingBlog, setEditingBlog] = useState<BlogPost | null>(null);
   const [editingCase, setEditingCase] = useState<CaseStudy | null>(null);
-  const [adminBlogs, setAdminBlogs] = useState<BlogPost[]>([]);
-  const [adminCases, setAdminCases] = useState<CaseStudy[]>([]);
-  const [exportCode, setExportCode] = useState<string | null>(null);
+  const [blogs, setBlogs] = useState<BlogPost[]>([]);
+  const [cases, setCases] = useState<CaseStudy[]>([]);
   const [toast, setToast] = useState('');
+  const [toastType, setToastType] = useState<'success' | 'error'>('success');
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const blogRef = useRef<HTMLDivElement>(null);
   const caseRef = useRef<HTMLDivElement>(null);
   const mainScrollRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    try {
-      const b = localStorage.getItem(LS_BLOG);
-      const c = localStorage.getItem(LS_CASE);
-      if (b) setAdminBlogs(JSON.parse(b));
-      if (c) setAdminCases(JSON.parse(c));
-    } catch {}
-  }, []);
+  const authHeader = { Authorization: `Bearer ${token}` };
 
-  const showToast = useCallback((msg: string) => {
+  const showToast = useCallback((msg: string, type: 'success' | 'error' = 'success') => {
     setToast(msg);
-    setTimeout(() => setToast(''), 3000);
+    setToastType(type);
+    setTimeout(() => setToast(''), 3500);
   }, []);
 
-  function saveBlogs(posts: BlogPost[]) {
-    setAdminBlogs(posts);
-    localStorage.setItem(LS_BLOG, JSON.stringify(posts));
+  const fetchAll = useCallback(async () => {
+    try {
+      const [bRes, cRes] = await Promise.all([
+        fetch('/api/blog?status=all', { headers: authHeader }),
+        fetch('/api/case-study?status=all', { headers: authHeader }),
+      ]);
+      if (bRes.ok) setBlogs(await bRes.json());
+      if (cRes.ok) setCases(await cRes.json());
+    } catch {
+      showToast('Failed to load content', 'error');
+    } finally {
+      setLoading(false);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
+
+  useEffect(() => { fetchAll(); }, [fetchAll]);
+
+  async function handleSaveBlog(post: BlogPost, status: 'draft' | 'published') {
+    setSaving(true);
+    try {
+      const exists = blogs.some((b) => b.slug === post.slug);
+      const url = exists ? `/api/blog/${post.slug}` : '/api/blog';
+      const method = exists ? 'PUT' : 'POST';
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json', ...authHeader },
+        body: JSON.stringify({ ...post, status }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        showToast(err.error || 'Save failed', 'error');
+        return;
+      }
+      await fetchAll();
+      setView('dashboard');
+      setEditingBlog(null);
+      showToast(status === 'published' ? 'Blog post published ✓' : 'Saved as draft ✓');
+    } catch {
+      showToast('Save failed', 'error');
+    } finally {
+      setSaving(false);
+    }
   }
 
-  function saveCases(cases: CaseStudy[]) {
-    setAdminCases(cases);
-    localStorage.setItem(LS_CASE, JSON.stringify(cases));
+  async function handleSaveCase(cs: CaseStudy, status: 'draft' | 'published') {
+    setSaving(true);
+    try {
+      const exists = cases.some((c) => c.slug === cs.slug);
+      const url = exists ? `/api/case-study/${cs.slug}` : '/api/case-study';
+      const method = exists ? 'PUT' : 'POST';
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json', ...authHeader },
+        body: JSON.stringify({ ...cs, status }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        showToast(err.error || 'Save failed', 'error');
+        return;
+      }
+      await fetchAll();
+      setView('dashboard');
+      setEditingCase(null);
+      showToast(status === 'published' ? 'Case study published ✓' : 'Saved as draft ✓');
+    } catch {
+      showToast('Save failed', 'error');
+    } finally {
+      setSaving(false);
+    }
   }
 
-  function handleSaveBlog(post: BlogPost) {
-    const idx = adminBlogs.findIndex((b) => b.slug === post.slug);
-    saveBlogs(idx >= 0 ? adminBlogs.map((b, i) => (i === idx ? post : b)) : [...adminBlogs, post]);
-    setView('dashboard');
-    setEditingBlog(null);
-    showToast('Blog post saved to drafts ✓');
+  async function handleDeleteBlog(slug: string) {
+    try {
+      await fetch(`/api/blog/${slug}`, { method: 'DELETE', headers: authHeader });
+      await fetchAll();
+      setDeleteConfirm(null);
+      showToast('Post deleted');
+    } catch {
+      showToast('Delete failed', 'error');
+    }
   }
 
-  function handleSaveCase(cs: CaseStudy) {
-    const idx = adminCases.findIndex((c) => c.slug === cs.slug);
-    saveCases(idx >= 0 ? adminCases.map((c, i) => (i === idx ? cs : c)) : [...adminCases, cs]);
-    setView('dashboard');
-    setEditingCase(null);
-    showToast('Case study saved to drafts ✓');
-  }
-
-  function handleDeleteBlog(slug: string) {
-    saveBlogs(adminBlogs.filter((b) => b.slug !== slug));
-    setDeleteConfirm(null);
-    showToast('Draft deleted');
-  }
-
-  function handleDeleteCase(slug: string) {
-    saveCases(adminCases.filter((c) => c.slug !== slug));
-    setDeleteConfirm(null);
-    showToast('Draft deleted');
+  async function handleDeleteCase(slug: string) {
+    try {
+      await fetch(`/api/case-study/${slug}`, { method: 'DELETE', headers: authHeader });
+      await fetchAll();
+      setDeleteConfirm(null);
+      showToast('Case study deleted');
+    } catch {
+      showToast('Delete failed', 'error');
+    }
   }
 
   function scrollTo(ref: React.RefObject<HTMLDivElement | null>) {
@@ -277,14 +343,20 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
     }
   }
 
+  const publishedBlogs = blogs.filter((b) => b.status === 'published');
+  const draftBlogs = blogs.filter((b) => b.status === 'draft');
+  const publishedCases = cases.filter((c) => c.status === 'published');
+  const draftCases = cases.filter((c) => c.status === 'draft');
+
   /* Editor full-screen takeovers */
   if (view === 'blog-editor') {
     return (
       <BlogEditor
         initial={editingBlog ?? defaultBlog}
-        allBlogSlugs={[...BLOG_POSTS, ...adminBlogs].map((b) => b.slug)}
+        allBlogSlugs={blogs.map((b) => b.slug)}
         onSave={handleSaveBlog}
         onCancel={() => { setView('dashboard'); setEditingBlog(null); }}
+        saving={saving}
       />
     );
   }
@@ -295,11 +367,12 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
         initial={editingCase ?? defaultCase}
         onSave={handleSaveCase}
         onCancel={() => { setView('dashboard'); setEditingCase(null); }}
+        saving={saving}
       />
     );
   }
 
-  const totalDrafts = adminBlogs.length + adminCases.length;
+  const totalDrafts = draftBlogs.length + draftCases.length;
 
   /* ── Main layout ── */
   return (
@@ -338,14 +411,14 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
               icon="✍"
               label="Blog Posts"
               active={activeSection === 'blog'}
-              badge={adminBlogs.length}
+              badge={draftBlogs.length}
               onClick={() => navTo('blog')}
             />
             <NavItem
               icon="📊"
               label="Case Studies"
               active={activeSection === 'cases'}
-              badge={adminCases.length}
+              badge={draftCases.length}
               onClick={() => navTo('cases')}
             />
           </div>
@@ -456,28 +529,28 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
             {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <StatCard
-                value={BLOG_POSTS.length}
+                value={loading ? '…' : publishedBlogs.length}
                 label="Blog Posts"
                 sub="published"
                 icon="✍"
               />
               <StatCard
-                value={CASE_STUDIES.length}
+                value={loading ? '…' : publishedCases.length}
                 label="Case Studies"
                 sub="published"
                 icon="📊"
               />
               <StatCard
-                value={totalDrafts}
+                value={loading ? '…' : totalDrafts}
                 label="Drafts"
-                sub="pending export"
+                sub="unpublished"
                 icon="⏳"
                 accent={totalDrafts > 0}
               />
               <StatCard
-                value="1h"
-                label="ISR Cache"
-                sub="revalidation"
+                value={loading ? '…' : blogs.length + cases.length}
+                label="Total"
+                sub="all content"
                 icon="⟳"
                 green
               />
@@ -487,16 +560,19 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
             <div ref={blogRef} className="flex flex-col gap-4">
               <SectionHeader
                 title="Blog Posts"
-                published={BLOG_POSTS.length}
-                drafts={adminBlogs.length}
+                published={publishedBlogs.length}
+                drafts={draftBlogs.length}
                 primaryLabel="+ New Blog Post"
                 onPrimary={() => { setEditingBlog(null); setView('blog-editor'); }}
-                onExportAll={adminBlogs.length > 0 ? () => setExportCode(blogExport(adminBlogs)) : undefined}
               />
 
-              {adminBlogs.length > 0 && (
+              {loading && (
+                <p className="text-white/30 text-sm px-1">Loading…</p>
+              )}
+
+              {!loading && draftBlogs.length > 0 && (
                 <PostGroup label="Drafts" accent>
-                  {adminBlogs.map((post) => (
+                  {draftBlogs.map((post) => (
                     <PostRow
                       key={post.slug}
                       title={post.title || '(Untitled)'}
@@ -505,43 +581,48 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
                       status="draft"
                       onEdit={() => { setEditingBlog(post); setView('blog-editor'); }}
                       onDelete={() => setDeleteConfirm(`blog:${post.slug}`)}
-                      onExport={() => setExportCode(blogExport([post]))}
                     />
                   ))}
                 </PostGroup>
               )}
 
-              <PostGroup label="Published" dimmed>
-                {BLOG_POSTS.map((post) => (
-                  <PostRow
-                    key={post.slug}
-                    title={post.title}
-                    meta={[post.category, post.date].filter(Boolean).join(' · ')}
-                    img={post.img}
-                    status="published"
-                    onDuplicate={() => {
-                      setEditingBlog({ ...post, slug: post.slug + '-copy', title: post.title + ' (Copy)' });
-                      setView('blog-editor');
-                    }}
-                  />
-                ))}
-              </PostGroup>
+              {!loading && (
+                <PostGroup label="Published" dimmed>
+                  {publishedBlogs.map((post) => (
+                    <PostRow
+                      key={post.slug}
+                      title={post.title}
+                      meta={[post.category, post.date].filter(Boolean).join(' · ')}
+                      img={post.img}
+                      status="published"
+                      onEdit={() => { setEditingBlog(post); setView('blog-editor'); }}
+                      onDuplicate={() => {
+                        setEditingBlog({ ...post, slug: post.slug + '-copy', title: post.title + ' (Copy)', status: 'draft' });
+                        setView('blog-editor');
+                      }}
+                    />
+                  ))}
+                </PostGroup>
+              )}
             </div>
 
             {/* Case Studies section */}
             <div ref={caseRef} className="flex flex-col gap-4 pb-10">
               <SectionHeader
                 title="Case Studies"
-                published={CASE_STUDIES.length}
-                drafts={adminCases.length}
+                published={publishedCases.length}
+                drafts={draftCases.length}
                 primaryLabel="+ New Case Study"
                 onPrimary={() => { setEditingCase(null); setView('case-editor'); }}
-                onExportAll={adminCases.length > 0 ? () => setExportCode(caseExport(adminCases)) : undefined}
               />
 
-              {adminCases.length > 0 && (
+              {loading && (
+                <p className="text-white/30 text-sm px-1">Loading…</p>
+              )}
+
+              {!loading && draftCases.length > 0 && (
                 <PostGroup label="Drafts" accent>
-                  {adminCases.map((cs) => (
+                  {draftCases.map((cs) => (
                     <PostRow
                       key={cs.slug}
                       title={cs.brand ? `${cs.brand}${cs.headline ? ' — ' + cs.headline : ''}` : '(Untitled)'}
@@ -550,38 +631,39 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
                       status="draft"
                       onEdit={() => { setEditingCase(cs); setView('case-editor'); }}
                       onDelete={() => setDeleteConfirm(`case:${cs.slug}`)}
-                      onExport={() => setExportCode(caseExport([cs]))}
                     />
                   ))}
                 </PostGroup>
               )}
 
-              <PostGroup label="Published" dimmed>
-                {CASE_STUDIES.map((cs) => (
-                  <PostRow
-                    key={cs.slug}
-                    title={`${cs.brand} — ${cs.headline}`}
-                    meta={[cs.category, cs.period].filter(Boolean).join(' · ')}
-                    img={cs.img}
-                    status="published"
-                    onDuplicate={() => {
-                      setEditingCase({ ...cs, slug: cs.slug + '-copy', brand: cs.brand + ' (Copy)' });
-                      setView('case-editor');
-                    }}
-                  />
-                ))}
-              </PostGroup>
+              {!loading && (
+                <PostGroup label="Published" dimmed>
+                  {publishedCases.map((cs) => (
+                    <PostRow
+                      key={cs.slug}
+                      title={`${cs.brand} — ${cs.headline}`}
+                      meta={[cs.category, cs.period].filter(Boolean).join(' · ')}
+                      img={cs.img}
+                      status="published"
+                      onEdit={() => { setEditingCase(cs); setView('case-editor'); }}
+                      onDuplicate={() => {
+                        setEditingCase({ ...cs, slug: cs.slug + '-copy', brand: cs.brand + ' (Copy)', status: 'draft' });
+                        setView('case-editor');
+                      }}
+                    />
+                  ))}
+                </PostGroup>
+              )}
             </div>
 
             {/* Workflow hint */}
             <div className="border border-white/[0.06] rounded-xl p-4 bg-white/[0.015] flex items-start gap-3">
               <span className="text-base shrink-0 mt-0.5">💡</span>
               <p className="text-white/30 text-xs leading-relaxed">
-                <strong className="text-white/50">Publishing workflow:</strong> Draft posts live in your browser.
-                Click <span className="text-orange-400/70">Export</span> to copy TypeScript, paste into{' '}
-                <code className="bg-white/[0.07] px-1 py-0.5 rounded text-white/50">app/blog/data.ts</code> or{' '}
-                <code className="bg-white/[0.07] px-1 py-0.5 rounded text-white/50">app/case-study/data.ts</code>,
-                commit, and Vercel rebuilds automatically.
+                <strong className="text-white/50">Publishing workflow:</strong> Use{' '}
+                <span className="text-white/50">Save as Draft</span> to store privately, or{' '}
+                <span className="text-orange-400/70">Publish</span> to make it live instantly.
+                All content is stored in MongoDB — no code changes or deployments needed.
               </p>
             </div>
 
@@ -591,7 +673,11 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
 
       {/* ── Toast ── */}
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 bg-[#1a1a1a] border border-green-500/30 text-green-400 text-sm px-4 py-2.5 rounded-xl shadow-xl backdrop-blur-xl">
+        <div className={`fixed bottom-6 right-6 z-50 bg-[#1a1a1a] border text-sm px-4 py-2.5 rounded-xl shadow-xl backdrop-blur-xl ${
+          toastType === 'error'
+            ? 'border-red-500/30 text-red-400'
+            : 'border-green-500/30 text-green-400'
+        }`}>
           {toast}
         </div>
       )}
@@ -624,8 +710,6 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
         </div>
       )}
 
-      {/* ── Export modal ── */}
-      {exportCode && <ExportModal code={exportCode} onClose={() => setExportCode(null)} />}
     </div>
   );
 }
@@ -726,14 +810,12 @@ function SectionHeader({
   drafts,
   primaryLabel,
   onPrimary,
-  onExportAll,
 }: {
   title: string;
   published: number;
   drafts: number;
   primaryLabel: string;
   onPrimary: () => void;
-  onExportAll?: () => void;
 }) {
   return (
     <div className="flex items-center justify-between">
@@ -746,22 +828,12 @@ function SectionHeader({
           )}
         </p>
       </div>
-      <div className="flex gap-2">
-        {onExportAll && (
-          <button
-            onClick={onExportAll}
-            className="border border-white/12 text-white/50 hover:text-white text-xs px-3 py-1.5 rounded-lg hover:border-white/25 transition-all"
-          >
-            Export all
-          </button>
-        )}
-        <button
-          onClick={onPrimary}
-          className="bg-gradient-to-r from-orange-500 to-red-600 text-white text-xs font-semibold px-3 py-1.5 rounded-lg hover:opacity-90 transition-opacity"
-        >
-          {primaryLabel}
-        </button>
-      </div>
+      <button
+        onClick={onPrimary}
+        className="bg-gradient-to-r from-orange-500 to-red-600 text-white text-xs font-semibold px-3 py-1.5 rounded-lg hover:opacity-90 transition-opacity"
+      >
+        {primaryLabel}
+      </button>
     </div>
   );
 }
@@ -852,72 +924,3 @@ function PostRow({
   );
 }
 
-/* ─── Export modal ───────────────────────────────────────────────────────── */
-
-function ExportModal({ code, onClose }: { code: string; onClose: () => void }) {
-  const [copied, setCopied] = useState(false);
-
-  function copy() {
-    navigator.clipboard.writeText(code).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    });
-  }
-
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
-      onClick={(e) => e.target === e.currentTarget && onClose()}
-    >
-      <div className="w-full max-w-2xl bg-[#0f0f0f] border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.07]">
-          <div>
-            <p className="text-sm font-semibold text-white">Export TypeScript</p>
-            <p className="text-[11px] text-white/35 mt-0.5">
-              Copy → paste into the data.ts file → commit → Vercel deploys
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={copy}
-              className={`rounded-lg px-4 py-1.5 text-sm font-medium transition-all ${
-                copied
-                  ? 'bg-green-500/20 border border-green-500/30 text-green-400'
-                  : 'bg-orange-500 hover:bg-orange-600 text-white'
-              }`}
-            >
-              {copied ? '✓ Copied!' : 'Copy code'}
-            </button>
-            <button
-              onClick={onClose}
-              className="text-white/35 hover:text-white px-3 py-1.5 text-sm transition-colors"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-        <pre className="p-5 text-[11px] text-white/70 font-mono overflow-auto max-h-[55vh] leading-relaxed whitespace-pre-wrap">
-          {code}
-        </pre>
-      </div>
-    </div>
-  );
-}
-
-/* ─── Export generators ──────────────────────────────────────────────────── */
-
-function blogExport(posts: BlogPost[]): string {
-  const entries = posts.map((p) => JSON.stringify(p, null, 2)).join(',\n');
-  return `// ─── Paste into app/blog/data.ts → inside the BLOG_POSTS array ───
-// Add a comma after the last existing entry before pasting.
-
-${entries}`;
-}
-
-function caseExport(cases: CaseStudy[]): string {
-  const entries = cases.map((c) => JSON.stringify(c, null, 2)).join(',\n');
-  return `// ─── Paste into app/case-study/data.ts → inside the CASE_STUDIES array ───
-// Add a comma after the last existing entry before pasting.
-
-${entries}`;
-}

@@ -1,0 +1,49 @@
+export type CaseMetric = {
+  v: string;
+  l: string;
+  desc: string;
+};
+
+export type CaseStudy = {
+  slug: string;
+  brand: string;
+  category: string;
+  headline: string;
+  subheadline?: string;
+  img: string;
+  period: string;
+  objective?: string;
+  region?: string;
+  tags: string[];
+  metrics: CaseMetric[];
+  overview: {
+    challenge: string;
+    solution: string;
+    result: string;
+  };
+  keyTakeaway?: string;
+  approach: { title: string; desc: string }[];
+  channels: string[];
+  testimonial?: { quote: string; name: string; role: string };
+  status: 'published' | 'draft';
+  createdAt?: Date;
+  updatedAt?: Date;
+};
+
+export type CaseStudyInput = Omit<CaseStudy, 'createdAt' | 'updatedAt'>;
+
+export function validateCaseStudy(data: Partial<CaseStudy>): string[] {
+  const errors: string[] = [];
+  if (!data.slug) errors.push('slug is required');
+  if (!data.brand) errors.push('brand is required');
+  if (!data.category) errors.push('category is required');
+  if (!data.headline) errors.push('headline is required');
+  if (!data.img) errors.push('img is required');
+  if (!data.period) errors.push('period is required');
+  if (!Array.isArray(data.tags)) errors.push('tags must be an array');
+  if (!Array.isArray(data.metrics)) errors.push('metrics must be an array');
+  if (!data.overview) errors.push('overview is required');
+  if (!Array.isArray(data.approach)) errors.push('approach must be an array');
+  if (!Array.isArray(data.channels)) errors.push('channels must be an array');
+  return errors;
+}

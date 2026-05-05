@@ -4,7 +4,7 @@
  * a user visits the site with `?demo` in the URL and toggles the switch.
  */
 
-import type { BlogPost } from '@/app/blog/data';
+import type { BlogPost } from '@/lib/models/blog';
 
 /* ─── Lorem blog posts ─────────────────────────────────────────────────── */
 
@@ -24,6 +24,7 @@ export const LOREM_BLOG_POSTS: BlogPost[] = [
     blocks: [],
     tags: ['LOREM', 'IPSUM', 'DOLOR'],
     relatedSlugs: ['lorem-post-2', 'lorem-post-3'],
+    status: 'published',
   },
   {
     slug: 'lorem-post-2',
@@ -40,6 +41,7 @@ export const LOREM_BLOG_POSTS: BlogPost[] = [
     blocks: [],
     tags: ['LOREM', 'CTV'],
     relatedSlugs: ['lorem-post-1', 'lorem-post-3'],
+    status: 'published',
   },
   {
     slug: 'lorem-post-3',
@@ -56,6 +58,7 @@ export const LOREM_BLOG_POSTS: BlogPost[] = [
     blocks: [],
     tags: ['MEASUREMENT', 'LOREM'],
     relatedSlugs: ['lorem-post-1', 'lorem-post-2'],
+    status: 'published',
   },
   {
     slug: 'lorem-post-4',
@@ -72,6 +75,7 @@ export const LOREM_BLOG_POSTS: BlogPost[] = [
     blocks: [],
     tags: ['CREATIVE', 'IPSUM'],
     relatedSlugs: ['lorem-post-2', 'lorem-post-3'],
+    status: 'published',
   },
   {
     slug: 'lorem-post-5',
@@ -88,6 +92,7 @@ export const LOREM_BLOG_POSTS: BlogPost[] = [
     blocks: [],
     tags: ['INDUSTRY', 'LOREM'],
     relatedSlugs: ['lorem-post-1', 'lorem-post-4'],
+    status: 'published',
   },
   {
     slug: 'lorem-post-6',
@@ -104,6 +109,7 @@ export const LOREM_BLOG_POSTS: BlogPost[] = [
     blocks: [],
     tags: ['PROGRAMMATIC', 'LOREM', 'DOLOR'],
     relatedSlugs: ['lorem-post-2', 'lorem-post-5'],
+    status: 'published',
   },
 ];
 

@@ -91,12 +91,12 @@ const CASES = [
   },
 ];
 
-export function CaseStudyBody() {
+export function CaseStudyBody({ cases: liveCases = [] }: { cases?: typeof CASES }) {
   const { isDemo } = useDemo();
   const ref = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState("All");
 
-  const allCases = isDemo ? LOREM_CASES : CASES;
+  const allCases = isDemo ? LOREM_CASES : liveCases;
   const filtered = active === "All" ? allCases : allCases.filter((c) => c.category === active);
 
   useEffect(() => {

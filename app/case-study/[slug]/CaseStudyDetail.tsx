@@ -5,7 +5,7 @@ import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { addReveal } from "../../utils/scrollReveal";
-import { CaseStudy, CASE_STUDIES } from "../data";
+import type { CaseStudy } from "@/lib/models/case-study";
 import { useDemo } from "../../context/DemoMode";
 
 const LOREM_CASE: CaseStudy = {
@@ -40,9 +40,10 @@ const LOREM_CASE: CaseStudy = {
     name: "Lorem Ipsum",
     role: "Head of Lorem, Dolor Sit Corp",
   },
+  status: 'published' as const,
 };
 
-export function CaseStudyDetail({ data }: { data: CaseStudy }) {
+export function CaseStudyDetail({ data, nextCase }: { data: CaseStudy; nextCase?: CaseStudy | null }) {
   const { isDemo } = useDemo();
   const d = isDemo ? LOREM_CASE : data;
   const ref = useRef<HTMLDivElement>(null);
@@ -108,8 +109,9 @@ export function CaseStudyDetail({ data }: { data: CaseStudy }) {
     };
   }, []);
 
-  const nextCase = CASE_STUDIES[(CASE_STUDIES.findIndex((c) => c.slug === data.slug) + 1) % CASE_STUDIES.length];
-  const next = isDemo ? { ...nextCase, brand: "Lorem Ipsum Corp", headline: "Lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod.", tags: nextCase.tags } : nextCase;
+  const next = isDemo && nextCase
+    ? { ...nextCase, brand: "Lorem Ipsum Corp", headline: "Lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod.", tags: nextCase.tags }
+    : nextCase ?? null;
 
   return (
     <div ref={ref}>
@@ -259,22 +261,24 @@ export function CaseStudyDetail({ data }: { data: CaseStudy }) {
       )}
 
       {/* ── Next case ── */}
-      <section className="px-6 md:px-[136px] py-10 md:py-16">
-        <p className="font-helvetica font-bold text-xs tracking-[9px] mb-6" style={{ color: "#ef6600" }}>NEXT CASE STUDY</p>
-        <Link href={`/case-study/${next.slug}`}>
-          <article className="cs-section group relative rounded-[28px] overflow-hidden h-[280px] md:h-[360px]">
-            <Image src={next.img} alt={next.brand} fill sizes="100vw" className="object-cover scale-[1.01] transition-transform duration-700 group-hover:scale-[1.06]" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
-            <div className="absolute inset-0 flex flex-col justify-end p-8 md:p-10">
-              <div className="flex gap-2 mb-3">
-                {next.tags.map((t) => <span key={t} className="chip">{t}</span>)}
+      {next && (
+        <section className="px-6 md:px-[136px] py-10 md:py-16">
+          <p className="font-helvetica font-bold text-xs tracking-[9px] mb-6" style={{ color: "#ef6600" }}>NEXT CASE STUDY</p>
+          <Link href={`/case-study/${next.slug}`}>
+            <article className="cs-section group relative rounded-[28px] overflow-hidden h-[280px] md:h-[360px]">
+              <Image src={next.img} alt={next.brand} fill sizes="100vw" className="object-cover scale-[1.01] transition-transform duration-700 group-hover:scale-[1.06]" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+              <div className="absolute inset-0 flex flex-col justify-end p-8 md:p-10">
+                <div className="flex gap-2 mb-3">
+                  {next.tags.map((t) => <span key={t} className="chip">{t}</span>)}
+                </div>
+                <h3 className="font-bricolage font-bold text-2xl md:text-4xl text-white tracking-tight">{next.brand}</h3>
+                <p className="text-sm text-white/80 mt-2 max-w-[600px]">{next.headline}</p>
               </div>
-              <h3 className="font-bricolage font-bold text-2xl md:text-4xl text-white tracking-tight">{next.brand}</h3>
-              <p className="text-sm text-white/80 mt-2 max-w-[600px]">{next.headline}</p>
-            </div>
-          </article>
-        </Link>
-      </section>
+            </article>
+          </Link>
+        </section>
+      )}
     </div>
   );
 }

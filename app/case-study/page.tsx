@@ -4,12 +4,18 @@ import { ContactCTA } from "../components/ContactCTA";
 import { BackgroundGrain } from "../components/BackgroundGrain";
 import { PageHero } from "../components/PageHero";
 import { CaseStudyBody } from "./CaseStudyBody";
+import { getDbCaseStudies } from "@/lib/db/case-study";
+
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: "Case Studies — Go Mobile",
   description: "Campaigns that moved the numbers. Real brands, real lift, real results.",
 };
 
-export default function CaseStudyPage() {
+export default async function CaseStudyPage() {
+  const cases = await getDbCaseStudies('published');
+
   return (
     <main className="relative min-h-screen overflow-hidden">
       <BackgroundGrain />
@@ -23,7 +29,7 @@ export default function CaseStudyPage() {
         }
         lede="A look at how we plan, buy, and optimize for brands across categories — and the lift we delivered."
       />
-      <CaseStudyBody />
+      <CaseStudyBody cases={cases} />
       <ContactCTA />
       <Footer />
     </main>

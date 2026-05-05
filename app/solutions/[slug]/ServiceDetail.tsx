@@ -6,7 +6,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { addReveal } from "../../utils/scrollReveal";
 import { Service, SERVICES } from "../data";
-import { CASE_STUDIES } from "../../case-study/data";
+import type { CaseStudy } from "@/lib/models/case-study";
 import { Html5Gallery } from "./Html5Gallery";
 import { useDemo } from "../../context/DemoMode";
 
@@ -39,7 +39,7 @@ const LOREM_SERVICE: Service = {
   relatedCases: [],
 };
 
-export function ServiceDetail({ data }: { data: Service }) {
+export function ServiceDetail({ data, relatedCases = [] }: { data: Service; relatedCases?: CaseStudy[] }) {
   const { isDemo } = useDemo();
   const d = isDemo ? LOREM_SERVICE : data;
   const ref = useRef<HTMLDivElement>(null);
@@ -81,7 +81,7 @@ export function ServiceDetail({ data }: { data: Service }) {
     return () => { heroTweens.forEach((t) => t.kill()); };
   }, []);
 
-  const related = isDemo ? [] : CASE_STUDIES.filter((c) => data.relatedCases.includes(c.slug));
+  const related = isDemo ? [] : relatedCases;
   const nextService = SERVICES[(SERVICES.findIndex((s) => s.slug === data.slug) + 1) % SERVICES.length];
   const nextSvc = isDemo ? { ...nextService, title: "Lorem Ipsum Dolor", eyebrow: "02 — LOREM IPSUM" } : nextService;
 

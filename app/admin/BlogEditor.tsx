@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import type { BlogPost, ContentBlock, SEOMeta } from '@/app/blog/data';
+import type { BlogPost, ContentBlock, SEOMeta } from '@/lib/models/blog';
 import { Field, ChipInput, AdminHeader, inputCls } from './components';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -412,11 +412,12 @@ function CharCounter({ current, max }: { current: number; max: number }) {
 interface Props {
   initial: BlogPost;
   allBlogSlugs: string[];
-  onSave: (post: BlogPost) => void;
+  onSave: (post: BlogPost, status: 'draft' | 'published') => void;
   onCancel: () => void;
+  saving?: boolean;
 }
 
-export default function BlogEditor({ initial, allBlogSlugs, onSave, onCancel }: Props) {
+export default function BlogEditor({ initial, allBlogSlugs, onSave, onCancel, saving }: Props) {
   const [post, setPost] = useState<BlogPost>(initial);
   const [blocks, setBlocks] = useState<ContentBlock[]>(
     initial.blocks?.length
@@ -490,9 +491,9 @@ export default function BlogEditor({ initial, allBlogSlugs, onSave, onCancel }: 
     return Object.keys(e).length === 0;
   }
 
-  function handleSave() {
+  function handleSave(status: 'draft' | 'published') {
     if (!validate()) return;
-    onSave({ ...post, blocks, seo });
+    onSave({ ...post, blocks, seo }, status);
   }
 
   const metaTitlePreview = seo.metaTitle || post.title;
@@ -502,9 +503,12 @@ export default function BlogEditor({ initial, allBlogSlugs, onSave, onCancel }: 
     <div className="h-screen bg-[#0a0a0a] text-white flex flex-col overflow-hidden">
       <AdminHeader
         breadcrumbs={['Blog Posts', post.title || 'New Post']}
-        onPrimary={handleSave}
-        primaryLabel="Save Post"
+        onPrimary={() => handleSave('published')}
+        primaryLabel="Publish"
+        onSecondary={() => handleSave('draft')}
+        secondaryLabel="Save as Draft"
         onCancel={onCancel}
+        saving={saving}
       />
 
       <div className="flex-1 flex overflow-hidden">

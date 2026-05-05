@@ -151,12 +151,18 @@ export function AdminHeader({
   breadcrumbs,
   onPrimary,
   primaryLabel,
+  onSecondary,
+  secondaryLabel,
   onCancel,
+  saving,
 }: {
   breadcrumbs: string[];
   onPrimary: () => void;
   primaryLabel: string;
+  onSecondary?: () => void;
+  secondaryLabel?: string;
   onCancel: () => void;
+  saving?: boolean;
 }) {
   return (
     <header className="sticky top-0 z-50 border-b border-white/[0.07] bg-[#0a0a0a]/95 backdrop-blur-xl shrink-0">
@@ -181,16 +187,28 @@ export function AdminHeader({
           <button
             type="button"
             onClick={onCancel}
-            className="border border-white/15 text-white/60 hover:text-white hover:border-white/30 rounded-lg px-4 py-1.5 text-sm transition-all"
+            disabled={saving}
+            className="border border-white/15 text-white/60 hover:text-white hover:border-white/30 rounded-lg px-4 py-1.5 text-sm transition-all disabled:opacity-40"
           >
             Cancel
           </button>
+          {onSecondary && secondaryLabel && (
+            <button
+              type="button"
+              onClick={onSecondary}
+              disabled={saving}
+              className="border border-white/15 text-white/60 hover:text-white hover:border-white/30 rounded-lg px-4 py-1.5 text-sm transition-all disabled:opacity-40"
+            >
+              {saving ? '...' : secondaryLabel}
+            </button>
+          )}
           <button
             type="button"
             onClick={onPrimary}
-            className="bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-lg px-4 py-1.5 text-sm font-medium hover:opacity-90 transition-opacity"
+            disabled={saving}
+            className="bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-lg px-4 py-1.5 text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
           >
-            {primaryLabel}
+            {saving ? 'Saving…' : primaryLabel}
           </button>
         </div>
       </div>
